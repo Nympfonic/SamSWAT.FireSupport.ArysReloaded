@@ -2,7 +2,6 @@
 using Comfort.Common;
 using EFT;
 using EFT.UI.Gestures;
-using EFT.UI;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -11,7 +10,8 @@ namespace SamSWAT.FireSupport
 {
     public class GesturesMenuPatch : ModulePatch
     {
-        private static GameObject _uiGameObject;
+        private static GameObject _fireSupportUI;
+
         protected override MethodBase GetTargetMethod()
         {
             return typeof(GesturesMenu).GetMethod("Init", BindingFlags.Public | BindingFlags.Instance);
@@ -20,7 +20,7 @@ namespace SamSWAT.FireSupport
         [PatchPostfix]
         public static async void PatchPostfix(GesturesMenu __instance)
         {
-            if (Singleton<GameWorld>.Instantiated && Plugin.PluginEnabled.Value && _uiGameObject == null)
+            if (Plugin.PluginEnabled.Value && Singleton<GameWorld>.Instantiated && _fireSupportUI == null)
             {
                 Player player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
                 bool playerHasRangefinder = player.Profile.Inventory.AllRealPlayerItems.Any(x => x.TemplateId == "61605e13ffa6e502ac5e7eef");
@@ -29,16 +29,15 @@ namespace SamSWAT.FireSupport
                 {
                     if (!ItemFactory.Instantiated)
                         ItemFactory.Init();
-                    if (!WeaponClass.Instantiated)
-                        WeaponClass.Init();
-                    GameObject fireSupportUI = await Utils.LoadAssetAsync("assets/content/ui/FireSupport_UI.bundle", "FireSupportUI");
-                    _uiGameObject = Object.Instantiate(fireSupportUI, __instance.transform);
-                    //go.transform.localPosition = Vector3.zero;
-                    Utils.FireSupportUI = _uiGameObject.GetComponent<FireSupportUI>();
-                    Utils.FireSupportUI.Init(__instance);
-                    Singleton<GUISounds>.Instance.PlaySound(Utils.GetRandomAudio(Utils.FireSupportUI.StationReminder));
-                    //Utils.UnloadBundle("firesupport_ui.bundle");
-                    //__instance.gameObject.AddComponent<FireSupportUI>();
+                    WeaponClass.Init();
+                    _fireSupportUI = Object.Instantiate(await Utils.LoadAssetAsync<GameObject>("assets/content/ui/firesupport_ui.bundle", "FireSupportUI"));
+                    _fireSupportUI.transform.parent = __instance.transform;
+                    _fireSupportUI.transform.localPosition = new Vector3(0, -255, 0);
+                    _fireSupportUI.transform.localScale = new Vector3(1.4f, 1.4f, 1);
+                    _fireSupportUI.GetComponent<FireSupportUI>().Init(__instance);
+                    FireSupportAudio.Instance.PlayVoiceover(VoiceoverType.StationReminder);
+                    __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(true).transform.localPosition = new Vector3(0, -530, 0);
+                    Utils.UnloadBundle("firesupport_ui.bundle");
                 }
             }
         }

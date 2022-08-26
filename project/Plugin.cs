@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using SamSWAT.FireSupport.Database;
 using System.IO;
-using UnityEngine;
 
 namespace SamSWAT.FireSupport
 {
@@ -16,6 +16,8 @@ namespace SamSWAT.FireSupport
         {
             Directory = Path.Combine(BepInEx.Paths.PluginPath, "SamSWAT.FireSupport/").Replace("\\", "/");
             new GesturesMenuPatch().Enable();
+            new AddItem().Enable();
+            new AddLocale().Enable();
 
             PluginEnabled = Config.Bind(
                 "Main Settings",
@@ -33,7 +35,7 @@ namespace SamSWAT.FireSupport
                 "Cooldown between fire support requests",
                 300,
                 new ConfigDescription("Seconds",
-                new AcceptableValueRange<int>(20, 3600)));
+                new AcceptableValueRange<int>(100, 3600)));
         }
     }
 }

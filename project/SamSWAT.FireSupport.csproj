@@ -31,53 +31,70 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aki.Reflection">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\Aki.Reflection.dll</HintPath>
+    <Reference Include="Aki.Reflection, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\Aki.Reflection.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\HelicopterCrashSites\project\SamSWAT.HeliCrash\References\Assembly-CSharp.dll</HintPath>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\project\SamSWAT.TimeWeatherChanger\project\SamSWAT.TimeWeatherChanger\References\BepInEx.dll</HintPath>
+    <Reference Include="BepInEx, Version=5.4.19.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\BepInEx.dll</HintPath>
     </Reference>
-    <Reference Include="Comfort">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+    <Reference Include="Comfort, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\Comfort.dll</HintPath>
     </Reference>
-    <Reference Include="Sirenix.Serialization">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+    <Reference Include="Sirenix.Serialization, Version=3.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\Sirenix.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\HelicopterCrashSites\project\SamSWAT.HeliCrash\References\UnityEngine.AssetBundleModule.dll</HintPath>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+    <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\HelicopterCrashSites\project\SamSWAT.HeliCrash\References\UnityEngine.CoreModule.dll</HintPath>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\project\SamSWAT.TimeWeatherChanger\project\SamSWAT.TimeWeatherChanger\References\UnityEngine.InputLegacyModule.dll</HintPath>
+    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>..\Deadass\References\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>..\..\..\..\Escape From Tarkov\EscapeFromTarkov_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Deadass\References\UnityEngine.UIElementsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="A10Behaviour.cs" />
+    <Compile Include="Database\AddLocale.cs" />
+    <Compile Include="Database\AddItem.cs" />
+    <Compile Include="FireSupportAudio.cs" />
+    <Compile Include="FireSupportSpotter.cs" />
     <Compile Include="FireSupportUI.cs" />
     <Compile Include="FireSupportUIElement.cs" />
     <Compile Include="GesturesMenuPatch.cs" />

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport
 {
-    internal class Utils
+    static class Utils
     {
         public static Dictionary<string, AssetBundle> LoadedBundles = new Dictionary<string, AssetBundle>();
-		public static FireSupportUI FireSupportUI;
+
 		public static async Task<AssetBundle> LoadBundleAsync(string bundleName)
 		{
 			if (LoadedBundles.TryGetValue(bundleName, out var bundle))
@@ -36,28 +34,28 @@ namespace SamSWAT.FireSupport
 			}
 		}
 
-		public static async Task<GameObject> LoadAssetAsync(string bundle, string assetName = null)
+		public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
 		{
 			AssetBundle ab = await LoadBundleAsync(bundle);
 			AssetBundleRequest assetBundleRequest;
 
 			if (assetName == null)
             {
-				assetBundleRequest = ab.LoadAllAssetsAsync<GameObject>();
+				assetBundleRequest = ab.LoadAllAssetsAsync<T>();
 			}
 			else
             {
-				assetBundleRequest = ab.LoadAssetAsync<GameObject>(assetName);
+				assetBundleRequest = ab.LoadAssetAsync<T>(assetName);
 			}
 
 			while (!assetBundleRequest.isDone)
 				await Task.Yield();
 
-			GameObject requestedGO = assetBundleRequest.allAssets[0] as GameObject;
+			var requestedObj = assetBundleRequest.allAssets[0] as T;
 
-			if (requestedGO != null)
+			if (requestedObj != null)
 			{
-				return requestedGO;
+				return requestedObj;
 			}
 			else
 			{
@@ -65,6 +63,7 @@ namespace SamSWAT.FireSupport
 				return null;
 			}
 		}
+
 		public static void UnloadBundle(string bundleName, bool unloadAllLoadedObjects = false)
         {
 			if (LoadedBundles.TryGetValue(bundleName, out var ab))
@@ -76,10 +75,6 @@ namespace SamSWAT.FireSupport
 			{
 				Debug.LogError($"AssetBundle '{bundleName}' already unloaded");
 			}
-		}
-		public static AudioClip GetRandomAudio(AudioClip[] audioClips)
-		{
-			return audioClips[UnityEngine.Random.Range(0, audioClips.Length)];
 		}
 	}
 }
