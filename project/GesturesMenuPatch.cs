@@ -35,7 +35,7 @@ namespace SamSWAT.FireSupport
                     _fireSupportUI.transform.localPosition = new Vector3(0, -255, 0);
                     _fireSupportUI.transform.localScale = new Vector3(1.4f, 1.4f, 1);
                     _fireSupportUI.GetComponent<FireSupportUI>().Init(__instance);
-                    FireSupportAudio.Instance.PlayVoiceover(VoiceoverType.StationReminder);
+                    FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationReminder);
                     __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(true).transform.localPosition = new Vector3(0, -530, 0);
                     Utils.UnloadBundle("firesupport_ui.bundle");
                 }

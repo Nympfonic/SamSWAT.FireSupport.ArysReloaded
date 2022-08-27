@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.UI;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport
@@ -7,15 +8,15 @@ namespace SamSWAT.FireSupport
     [CreateAssetMenu(fileName = "FireSupportAudio", menuName = "ScriptableObjects/FireSupportAudio")]
     public class FireSupportAudio : ScriptableObject
     {
-        public AudioClip[] StationReminder;
-        public AudioClip[] StationStrafeRequest;
-        public AudioClip[] StationExtractionRequest;
-        public AudioClip[] JetArriving;
-        public AudioClip[] JetFiring;
-        public AudioClip[] JetLeaving;
-        public AudioClip[] SupportHeliArriving;
-        public AudioClip[] SupportHeliPickingUp;
-        public AudioClip[] SupportHeliLeaving;
+        [SerializeField] private AudioClip[] StationReminder;
+        [SerializeField] private AudioClip[] StationStrafeRequest;
+        [SerializeField] private AudioClip[] StationExtractionRequest;
+        [SerializeField] private AudioClip[] JetArriving;
+        [SerializeField] private AudioClip[] JetFiring;
+        [SerializeField] private AudioClip[] JetLeaving;
+        [SerializeField] private AudioClip[] SupportHeliArriving;
+        [SerializeField] private AudioClip[] SupportHeliPickingUp;
+        [SerializeField] private AudioClip[] SupportHeliLeaving;
         private static FireSupportAudio _instance;
 
         public static FireSupportAudio Instance
@@ -26,42 +27,42 @@ namespace SamSWAT.FireSupport
             }
         }
 
-        void Awake()
+        public static async Task Load()
         {
-            _instance = this;
+            _instance = await Utils.LoadAssetAsync<FireSupportAudio>("assets/content/ui/firesupport_audio.bundle");
         }
 
-        public void PlayVoiceover(VoiceoverType voiceoverType)
+        public void PlayVoiceover(EVoiceoverType voiceoverType)
         {
             AudioClip voAudioClip;
 
             switch (voiceoverType)
             {
-                case VoiceoverType.StationReminder:
+                case EVoiceoverType.StationReminder:
                     voAudioClip = StationReminder[Random.Range(0, StationReminder.Length)];
                     break;
-                case VoiceoverType.StationStrafeRequest:
+                case EVoiceoverType.StationStrafeRequest:
                     voAudioClip = StationStrafeRequest[Random.Range(0, StationStrafeRequest.Length)];
                     break;
-                case VoiceoverType.StationExtractionRequst:
+                case EVoiceoverType.StationExtractionRequst:
                     voAudioClip = StationExtractionRequest[Random.Range(0, StationExtractionRequest.Length)];
                     break;
-                case VoiceoverType.JetArriving:
+                case EVoiceoverType.JetArriving:
                     voAudioClip = JetArriving[Random.Range(0, JetArriving.Length)];
                     break;
-                case VoiceoverType.JetFiring:
+                case EVoiceoverType.JetFiring:
                     voAudioClip = JetFiring[Random.Range(0, JetFiring.Length)];
                     break;
-                case VoiceoverType.JetLeaving:
+                case EVoiceoverType.JetLeaving:
                     voAudioClip = JetLeaving[Random.Range(0, JetLeaving.Length)];
                     break;
-                case VoiceoverType.SupportHeliArriving:
+                case EVoiceoverType.SupportHeliArriving:
                     voAudioClip = SupportHeliArriving[Random.Range(0, JetLeaving.Length)];
                     break;
-                case VoiceoverType.SupportHeliPickingUp:
+                case EVoiceoverType.SupportHeliPickingUp:
                     voAudioClip = SupportHeliPickingUp[Random.Range(0, JetLeaving.Length)];
                     break;
-                case VoiceoverType.SupportHeliLeaving:
+                case EVoiceoverType.SupportHeliLeaving:
                     voAudioClip = SupportHeliLeaving[Random.Range(0, JetLeaving.Length)];
                     break;
                 default:
@@ -74,18 +75,5 @@ namespace SamSWAT.FireSupport
                 Singleton<GUISounds>.Instance.PlaySound(voAudioClip);
             }
         }
-    }
-
-    public enum VoiceoverType
-    {
-        StationReminder,
-        StationStrafeRequest,
-        StationExtractionRequst,
-        JetArriving,
-        JetFiring,
-        JetLeaving,
-        SupportHeliArriving,
-        SupportHeliPickingUp,
-        SupportHeliLeaving
     }
 }

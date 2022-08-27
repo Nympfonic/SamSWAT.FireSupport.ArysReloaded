@@ -15,20 +15,26 @@ namespace SamSWAT.FireSupport
     public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private FireSupportAudio _fireSupportAudio;
-        [SerializeField] private List<GameObject> _spotterParticles;
         [SerializeField] private FireSupportUIElement[] _supportOptions;
         [SerializeField] private Text _timerText;
         [SerializeField] private HoverTooltipArea _tooltip;
         private A10Behaviour _a10Behaviour;
         private GesturesMenu _gesturesMenu;
         private Player _player;
-        private GameObject _inputManager;
-        private MonoBehaviour _coroutineStarter;
+        private ESupportType _selectedSupportOption;
         private float _menuOffset;
         private bool _isUnderPointer;
         private bool _strafeAvailable = true;
         private int _availableStrafeRequests;
-        private int _selectedSupportOption;
+        private static FireSupportUI _instance;
+
+        public static FireSupportUI Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
 
         public bool IsUnderPointer
         {
@@ -48,12 +54,11 @@ namespace SamSWAT.FireSupport
 
         public async void Init(GesturesMenu gesturesMenu)
         {
+            _instance = this;
             _menuOffset = Screen.height / 2 - transform.position.y;
             _gesturesMenu = gesturesMenu;
             _availableStrafeRequests = Plugin.AmmountOfRequets.Value;
             _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
-            _inputManager = GameObject.Find("___Input");
-            _coroutineStarter = Camera.main.GetComponent<MonoBehaviour>();
             var a10go = Instantiate(await Utils.LoadAssetAsync<GameObject>("assets/content/vehicles/a10_warthog.bundle"), new Vector3(0, -200, 0), Quaternion.identity);
             a10go.SetActive(false);
             _a10Behaviour = a10go.GetComponent<A10Behaviour>();
@@ -112,7 +117,7 @@ namespace SamSWAT.FireSupport
                         if (angle > i * 45 && angle < (i + 1) * 45 && _availableStrafeRequests > 0 && _strafeAvailable)
                         {
                             _supportOptions[i].IsUnderPointer = true;
-                            _selectedSupportOption = i;
+                            _selectedSupportOption = (ESupportType)i;
                         }
                         else
                         {
@@ -124,11 +129,11 @@ namespace SamSWAT.FireSupport
                     {
                         switch (_selectedSupportOption)
                         {
-                            case 2:
+                            case ESupportType.Strafe:
                                 if (_availableStrafeRequests > 0 && _strafeAvailable)
                                 {
                                     _gesturesMenu.Close();
-                                    _coroutineStarter.StartCoroutine(SupportRequest());
+                                    StaticManager.BeginCoroutine(FireSupportSpotter.Instance.SpotterSequence(ESupportType.Strafe));
                                 }
                                 break;
                         }
@@ -161,66 +166,13 @@ namespace SamSWAT.FireSupport
             return angle;
         }
 
-        //need to rewrite this mess later (ツ)
-        private IEnumerator SupportRequest()
-        {
-            GameObject spotterVertical = Instantiate(_spotterParticles[0]);
-            yield return new WaitForSecondsRealtime(.1f);
-            while (!Input.GetMouseButtonDown(0))
-            {
-                if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
-                {
-                    Destroy(spotterVertical);
-                    yield break;
-                }
-                var cum = Camera.main.transform;
-                Physics.Raycast(cum.position + cum.forward, cum.forward, out RaycastHit hitInfo, 250f, LayerMask.GetMask("Terrain", "LowPolyCollider"));
-                spotterVertical.transform.position = hitInfo.point;
-                yield return null;
-            }
-
-            GameObject spotterHorizontal = Instantiate(_spotterParticles[1], spotterVertical.transform.position, Quaternion.identity);
-            Destroy(spotterVertical);
-            yield return new WaitForSecondsRealtime(.1f);
-            _inputManager.SetActive(false);
-            while (!Input.GetMouseButtonDown(0))
-            {
-                if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
-                {
-                    Destroy(spotterHorizontal);
-                    _inputManager.SetActive(true);
-                    yield break;
-                }
-                float rotSpeed = 4f;
-                float xAxisRotation = Input.GetAxis("Mouse X") * rotSpeed;
-                spotterHorizontal.transform.Rotate(Vector3.down, xAxisRotation);
-                yield return null;
-            }
-            _inputManager.SetActive(true);
-            Transform[] transforms = spotterHorizontal.GetComponentsInChildren<Transform>();
-            Vector3 startingPosition = transforms.Single(x => x.name == "Spotter Arrow Core (1)").transform.position;
-            Vector3 endPosition = transforms.Single(x => x.name == "Spotter Arrow Core (6)").transform.position;
-            
-            GameObject spotterConfirmation = Instantiate(_spotterParticles[2], spotterHorizontal.transform.position + Vector3.up, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(.8f);
-            Destroy(spotterHorizontal);
-            Destroy(spotterConfirmation);
-            
-            switch(_selectedSupportOption)
-            {
-                case 2:
-                    _coroutineStarter.StartCoroutine(StrafeRequest(startingPosition, endPosition));
-                    break;
-            }
-        }
-
-        private IEnumerator StrafeRequest(Vector3 startingPosition, Vector3 endPosition)
+        public IEnumerator StrafeRequest(Vector3 startingPosition, Vector3 endPosition)
         {
             _availableStrafeRequests--;
-            _coroutineStarter.StartCoroutine(Timer(Plugin.RequestCooldown.Value, result => _strafeAvailable = result));
-            FireSupportAudio.Instance.PlayVoiceover(VoiceoverType.StationStrafeRequest);
+            StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value, result => _strafeAvailable = result));
+            FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
             yield return new WaitForSecondsRealtime(8f);
-            FireSupportAudio.Instance.PlayVoiceover(VoiceoverType.JetArriving);
+            FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetArriving);
             yield return new WaitForSecondsRealtime(3f);
             _a10Behaviour.StartStrafe(startingPosition, endPosition);
         }
