@@ -1,8 +1,6 @@
 ﻿using EFT;
-using EFT.InputSystem;
 using System.Collections;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport
@@ -25,10 +23,10 @@ namespace SamSWAT.FireSupport
             }
         }
 
-        public static async Task Load()
+        public static async void Load()
         {
             _instance = await Utils.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
-            _instance._inputManager = FindObjectOfType<InputManager>().gameObject;
+            _instance._inputManager = GameObject.Find("___Input");
         }
 
         public IEnumerator SpotterSequence(ESupportType supportType)
@@ -39,7 +37,7 @@ namespace SamSWAT.FireSupport
                 yield return StaticManager.BeginCoroutine(SpotterHorizontal());
                 yield return StaticManager.BeginCoroutine(SpotterConfirmation());
                 if (!_requestCanceled)
-                    FireSupportUI.Instance.StrafeRequest(_strafeStartPosition, _strafeEndPosition);
+                    StaticManager.BeginCoroutine(FireSupportUI.Instance.StrafeRequest(_strafeStartPosition, _strafeEndPosition));
             }
             
         }
@@ -55,15 +53,34 @@ namespace SamSWAT.FireSupport
                 {
                     Destroy(spotterVertical);
                     _requestCanceled = true;
+                    FireSupportUI.Instance.SpotterNotice.SetActive(false);
                     yield break;
                 }
                 var cum = Camera.main.transform;
-                Physics.Raycast(cum.position + cum.forward, cum.forward, out RaycastHit hitInfo, 250f, LayerMask.GetMask("Terrain", "LowPolyCollider"));
+                Physics.Raycast(cum.position + cum.forward, cum.forward, out RaycastHit hitInfo, 500, LayerMask.GetMask("Terrain", "LowPolyCollider"));
+                if (hitInfo.point == Vector3.zero)
+                {
+                    FireSupportUI.Instance.SpotterNotice.SetActive(true);
+                }
+                else
+                {
+                    FireSupportUI.Instance.SpotterNotice.SetActive(false);
+                }
                 spotterVertical.transform.position = hitInfo.point;
                 yield return null;
             }
-            _spotterPosition = spotterVertical.transform.position;
-            Destroy(spotterVertical);
+            if (spotterVertical.transform.position == Vector3.zero)
+            {
+                _requestCanceled = true;
+                FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationDoesNotHear);
+                FireSupportUI.Instance.SpotterNotice.SetActive(false);
+                Destroy(spotterVertical);
+            }
+            else
+            {
+                _spotterPosition = spotterVertical.transform.position;
+                Destroy(spotterVertical);
+            }
         }
 
         private IEnumerator SpotterHorizontal()
@@ -82,8 +99,8 @@ namespace SamSWAT.FireSupport
                         _requestCanceled = true;
                         yield break;
                     }
-                    float rotSpeed = 4f;
-                    float xAxisRotation = Input.GetAxis("Mouse X") * rotSpeed;
+                    //float rotSpeed = 4f;
+                    float xAxisRotation = Input.GetAxis("Mouse X") * 5;
                     spotterHorizontal.transform.Rotate(Vector3.down, xAxisRotation);
                     yield return null;
                 }

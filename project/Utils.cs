@@ -11,10 +11,13 @@ namespace SamSWAT.FireSupport
 
 		public static async Task<AssetBundle> LoadBundleAsync(string bundleName)
 		{
+			string bundlePath = bundleName;
+			bundleName = Regex.Match(bundleName, @"[^//]*$").Value;
+
 			if (LoadedBundles.TryGetValue(bundleName, out var bundle))
 				return bundle;
 
-			var bundleRequest = AssetBundle.LoadFromFileAsync(Plugin.Directory + bundleName);
+			var bundleRequest = AssetBundle.LoadFromFileAsync(Plugin.Directory + bundlePath);
 
 			while (!bundleRequest.isDone)
 				await Task.Yield();
@@ -23,8 +26,7 @@ namespace SamSWAT.FireSupport
 
 			if (requestedBundle != null)
 			{
-				string name = Regex.Match(bundleName, @"[^//]*$").Value;
-				LoadedBundles.Add(name, requestedBundle);
+				LoadedBundles.Add(bundleName, requestedBundle);
 				return requestedBundle;
 			}
 			else

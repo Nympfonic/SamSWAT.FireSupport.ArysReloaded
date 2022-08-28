@@ -44,6 +44,7 @@ namespace SamSWAT.FireSupport
         {
             if (Instantiated)
             {
+                _ballisticsCalc = Singleton<GameWorld>.Instance._sharedBallisticsCalculator;
                 _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
                 _weapon = (Weapon)ItemFactory.CreateItem(Guid.NewGuid().ToString("N").Substring(0, 24), "weapon_ge_gau8_avenger_30x173");
             }

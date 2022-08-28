@@ -4,8 +4,6 @@ using EFT.UI;
 using EFT.UI.Gestures;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,11 +12,10 @@ namespace SamSWAT.FireSupport
 {
     public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] private FireSupportAudio _fireSupportAudio;
+        public GameObject SpotterNotice;
         [SerializeField] private FireSupportUIElement[] _supportOptions;
         [SerializeField] private Text _timerText;
         [SerializeField] private HoverTooltipArea _tooltip;
-        private A10Behaviour _a10Behaviour;
         private GesturesMenu _gesturesMenu;
         private Player _player;
         private ESupportType _selectedSupportOption;
@@ -52,17 +49,19 @@ namespace SamSWAT.FireSupport
             }
         }
 
-        public async void Init(GesturesMenu gesturesMenu)
+        public static async void Load(GesturesMenu gesturesMenu)
         {
-            _instance = this;
-            _menuOffset = Screen.height / 2 - transform.position.y;
-            _gesturesMenu = gesturesMenu;
-            _availableStrafeRequests = Plugin.AmmountOfRequets.Value;
-            _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
-            var a10go = Instantiate(await Utils.LoadAssetAsync<GameObject>("assets/content/vehicles/a10_warthog.bundle"), new Vector3(0, -200, 0), Quaternion.identity);
-            a10go.SetActive(false);
-            _a10Behaviour = a10go.GetComponent<A10Behaviour>();
-            Utils.UnloadBundle("a10_warthog.bundle");
+            _instance = Instantiate(await Utils.LoadAssetAsync<GameObject>("assets/content/ui/firesupport_ui.bundle")).GetComponent<FireSupportUI>();
+            _instance.transform.parent = gesturesMenu.transform;
+            _instance.transform.localPosition = new Vector3(0, -255, 0);
+            _instance.transform.localScale = new Vector3(1.4f, 1.4f, 1);
+            _instance._menuOffset = Screen.height / 2 - _instance.transform.position.y;
+            _instance._gesturesMenu = gesturesMenu;
+            _instance._availableStrafeRequests = Plugin.AmmountOfRequets.Value;
+            _instance._player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
+            _instance.SpotterNotice.transform.parent = Singleton<GameUI>.Instance.transform;
+            _instance.SpotterNotice.transform.localPosition = new Vector3(0, -370f, 0);
+            _instance.SpotterNotice.transform.localScale = Vector3.one;
         }
 
         private void Update()
@@ -174,7 +173,7 @@ namespace SamSWAT.FireSupport
             yield return new WaitForSecondsRealtime(8f);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetArriving);
             yield return new WaitForSecondsRealtime(3f);
-            _a10Behaviour.StartStrafe(startingPosition, endPosition);
+            A10Behaviour.Instance.StartStrafe(startingPosition, endPosition);
         }
 
         private IEnumerator Timer(float time, Action<bool> requestAvailable)
@@ -194,6 +193,18 @@ namespace SamSWAT.FireSupport
             }
             requestAvailable(true);
             _timerText.enabled = false;
+            if (Plugin.VoiceoverNotice.Value && _availableStrafeRequests > 0)
+                FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationAvailable);
+        }
+
+        void OnDestroy()
+        {
+            Destroy(FireSupportAudio.Instance);
+            Destroy(FireSupportSpotter.Instance);
+            Utils.UnloadBundle("firesupport_audio.bundle", true);
+            Utils.UnloadBundle("firesupport_spotter.bundle", true);
+            Utils.UnloadBundle("firesupport_ui.bundle", true);
+            Utils.UnloadBundle("a10_warthog.bundle", true);
         }
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData data)

@@ -22,9 +22,9 @@ namespace SamSWAT.FireSupport.Database
 			gau8Ammo._id = "ammo_30x173_gau8_avenger";
 			gau8Ammo.ExplosionType = "big_smoky_explosion";
 			gau8Ammo.InitialSpeed = 1070f;
-			gau8Ammo.MinExplosionDistance = 30f;
-			gau8Ammo.MaxExplosionDistance = 50f;
-			gau8Ammo.ExplosionStrength = 150f;
+			gau8Ammo.MinExplosionDistance = 20f;
+			gau8Ammo.MaxExplosionDistance = 40f;
+			gau8Ammo.ExplosionStrength = 100f;
 			gau8Ammo.Damage = 300;
 			gau8Ammo.ArmorDamage = 150;
 			gau8Ammo.PenetrationPower = 100;
