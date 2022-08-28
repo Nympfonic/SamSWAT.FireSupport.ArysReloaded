@@ -15,9 +15,9 @@ namespace SamSWAT.FireSupport
         [SerializeField] private GameObject gau8Particles;
         [SerializeField] private GameObject _flareCountermeasure;
         private GameObject _flareCountermeasureInstance;
-        private static A10Behaviour _instance;
         private bool _strafeRequested;
         private Vector3 _strafeMiddlePos;
+        private static A10Behaviour _instance;
 
         public static A10Behaviour Instance
         {

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace SamSWAT.FireSupport
 {
-	public class FireSupportUIElement : MonoBehaviour
+    public class FireSupportUIElement : MonoBehaviour
 	{
 		public Image Icon;
 		public Image BackgroundImage;
@@ -11,6 +11,7 @@ namespace SamSWAT.FireSupport
 		public Sprite SelectedSubColor;
 		public Text AmountText;
 		private bool _isUnderPointer;
+
 		public bool IsUnderPointer
 		{
 			get
@@ -27,6 +28,7 @@ namespace SamSWAT.FireSupport
 				UnderPointerChanged(_isUnderPointer);
 			}
 		}
+
 		protected void UnderPointerChanged(bool isUnderPointer)
 		{
 			BackgroundImage.sprite = isUnderPointer? SelectedSubColor : DefaultSubColor;

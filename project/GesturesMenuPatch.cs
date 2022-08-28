@@ -19,7 +19,7 @@ namespace SamSWAT.FireSupport
         [PatchPostfix]
         public static async void PatchPostfix(GesturesMenu __instance)
         {
-            if (Plugin.PluginEnabled.Value && Singleton<GameWorld>.Instantiated && FireSupportUI.Instance == null )
+            if (Plugin.PluginEnabled.Value && Singleton<GameWorld>.Instantiated && FireSupportUI.Instance == null && LocationScene.GetAll<AirdropPoint>().Any())
             {
                 Player player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
                 bool playerHasRangefinder = player.Profile.Inventory.AllRealPlayerItems.Any(x => x.TemplateId == "61605e13ffa6e502ac5e7eef");
