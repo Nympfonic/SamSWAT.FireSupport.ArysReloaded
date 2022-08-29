@@ -14,7 +14,6 @@ namespace SamSWAT.FireSupport
         internal static ConfigEntry<int> AmmountOfRequets;
         internal static ConfigEntry<int> RequestCooldown;
         internal static ConfigEntry<int> VoiceoverVolume;
-        internal static ConfigEntry<bool> VoiceoverNotice;
 
         void Start()
         {
@@ -46,11 +45,6 @@ namespace SamSWAT.FireSupport
                 90,
                 new ConfigDescription("",
                 new AcceptableValueRange<int>(0, 100)));
-            VoiceoverNotice = Config.Bind(
-                "Sound Settings",
-                "Voiceover when support becomes avaialble again",
-                true,
-                new ConfigDescription(""));
             VoiceoverVolume.SettingChanged += VoiceoverVolume_SettingChanged;
         }
 

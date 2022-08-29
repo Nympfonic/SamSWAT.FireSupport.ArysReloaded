@@ -64,12 +64,12 @@ namespace SamSWAT.FireSupport
             gau8Particles.SetActive(false);
             yield return new WaitForSecondsRealtime(5);
             _flareCountermeasureInstance.SetActive(true);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, GetRandomClip(gau8Sound), Distance(gau8Transform.position), BetterAudio.AudioSourceGroupType.Gunshots, 3200, 2, EOcclusionTest.Regular);
+            Singleton<BetterAudio>.Instance.PlayAtPoint(gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, GetRandomClip(gau8Sound), Distance(gau8Transform.position), BetterAudio.AudioSourceGroupType.Gunshots, 3200, 2, EOcclusionTest.None);
             yield return new WaitForSecondsRealtime(8);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetLeaving);
-            yield return new WaitForSecondsRealtime(5);
+            yield return new WaitForSecondsRealtime(4);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationStrafeEnd);
-            yield return new WaitForSecondsRealtime(3);
+            yield return new WaitForSecondsRealtime(4);
             _strafeRequested = false;
             gameObject.SetActive(false);
         }

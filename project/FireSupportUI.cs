@@ -172,7 +172,7 @@ namespace SamSWAT.FireSupport
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
             yield return new WaitForSecondsRealtime(8f);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetArriving);
-            yield return new WaitForSecondsRealtime(3f);
+            yield return new WaitForSecondsRealtime(4f);
             A10Behaviour.Instance.StartStrafe(startingPosition, endPosition);
         }
 
@@ -193,7 +193,7 @@ namespace SamSWAT.FireSupport
             }
             requestAvailable(true);
             _timerText.enabled = false;
-            if (Plugin.VoiceoverNotice.Value && _availableStrafeRequests > 0)
+            if (_availableStrafeRequests > 0)
                 FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationAvailable);
         }
 
