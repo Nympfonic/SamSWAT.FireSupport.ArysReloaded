@@ -99,7 +99,7 @@ namespace SamSWAT.FireSupport
             if (_strafeRequested)
             {
                 _flareCountermeasureInstance.transform.position = transform.position - transform.forward * 6.5f;
-                _flareCountermeasureInstance.transform.eulerAngles = new Vector3(90, 0, transform.rotation.y);
+                _flareCountermeasureInstance.transform.eulerAngles = new Vector3(90, transform.eulerAngles.y, 0);
                 transform.Translate(0, 0, 148 * Time.deltaTime, Space.Self);
             }
         }
