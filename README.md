@@ -1,4 +1,4 @@
-<img src="https://media.discordapp.net/attachments/417281262085210112/1013842879715749999/140818-F-PO994-258-scaled.jpg?width=1440&height=450">
+<a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013842879715749999/140818-F-PO994-258-scaled.jpg?width=1440&height=450"></a>
 
 # Fire Support
 
@@ -10,26 +10,31 @@ Double tap `Y` key (by default) to open gestures menu where you should notice ne
 
 <details> 
   <summary>Radial Menu</summary>
-   <img src="https://media.discordapp.net/attachments/417281262085210112/1013870628366987334/radialmenu.png?width=256&height=256">
+   <a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013870628366987334/radialmenu.png?width=256&height=256"></a>
 </details>
 
 After you select support option, by clicking on it with `LMB`, vertical spotter mark will appear. Move your mouse around to choose position and then press `LMB` again. If you want to cancel request, you can do that by hitting `Left ALT` and `RMB`. Also, if your spotter can't hit any surface (e.g. you pointing into the sky) notice message will appear.
 
 <details> 
   <summary>Vertical Spotter</summary>
-   <img src="https://media.discordapp.net/attachments/417281262085210112/1013916622681022526/spotterVertical.gif?width=700&height=256">
+   <a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013916622681022526/spotterVertical.gif?width=700&height=256"></a>
 </details>
 
 Autocannon strafe implies that there is a heading of where to shoot, so after you confirmed position, horizontal spotter will appear allowing you to choose direction by moving your mouse left or right. At this point you still can cancel request by pressing `Left ALT` and `RMB`, or, if you wish to confirm, press `LMB` once again.
 
 <details> 
   <summary>Horizontal Spotter</summary>
-   <img src="https://media.discordapp.net/attachments/417281262085210112/1013916623188529162/spotterHorizontal.gif?width=700&height=256">
+   <a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013916623188529162/spotterHorizontal.gif?width=700&height=256"></a>
 </details>
 
-After confirmation, you will hear a radio message from station about your support request and a short time later the A-10 will strike at the selected position and direction in a rectangular pattern. The kill zone lies somewhere between 20 to 40 metres in each direction from the horizontal spotter.
+After confirmation, you will hear a radio message from station about your support request and a short time later the A-10 will strike at the selected position and direction in a rectangular pattern. The kill zone lies somewhere between 20 to 40 metres in each direction from the horizontal spotter. Some settings like request amount and its cooldown along with radio messages volume are configurable in BepInEx Configuration Manager that opens with `F12` key.
 
-Here's video example:
+<details> 
+  <summary>Available settings</summary>
+  <a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013924835543494758/unknown.png"></a>
+</details>
+
+Full video demonstration of this mod on YouTube:
 
 <details> 
   <summary>YouTube video</summary>
