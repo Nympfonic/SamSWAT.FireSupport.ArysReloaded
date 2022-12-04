@@ -7,12 +7,16 @@
         StationDoesNotHear,
         StationStrafeRequest,
         StationStrafeEnd,
-        StationExtractionRequst,
+        StationExtractionRequest,
         JetArriving,
         JetFiring,
         JetLeaving,
         SupportHeliArriving,
+        SupportHeliArrivingToPickup,
         SupportHeliPickingUp,
-        SupportHeliLeaving
+        SupportHeliHurry,
+        SupportHeliLeaving,
+        SupportHeliLeavingAfterPickup,
+        SupportHeliLeavingNoPickup
     }
 }

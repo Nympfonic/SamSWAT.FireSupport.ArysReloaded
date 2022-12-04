@@ -14,16 +14,10 @@ namespace SamSWAT.FireSupport
 
 		public bool IsUnderPointer
 		{
-			get
-			{
-				return _isUnderPointer;
-			}
+			get => _isUnderPointer;
 			set
 			{
-				if (_isUnderPointer == value)
-				{
-					return;
-				}
+				if (_isUnderPointer == value) return;
 				_isUnderPointer = value;
 				UnderPointerChanged(_isUnderPointer);
 			}

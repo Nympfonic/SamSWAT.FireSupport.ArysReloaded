@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace SamSWAT.FireSupport
 {
-    static class Utils
+	internal static class Utils
     {
-        public static Dictionary<string, AssetBundle> LoadedBundles = new Dictionary<string, AssetBundle>();
+	    private static Dictionary<string, AssetBundle> LoadedBundles = new Dictionary<string, AssetBundle>();
 
-		public static async Task<AssetBundle> LoadBundleAsync(string bundleName)
+        private static async Task<AssetBundle> LoadBundleAsync(string bundleName)
 		{
 			string bundlePath = bundleName;
 			bundleName = Regex.Match(bundleName, @"[^//]*$").Value;
@@ -29,11 +29,9 @@ namespace SamSWAT.FireSupport
 				LoadedBundles.Add(bundleName, requestedBundle);
 				return requestedBundle;
 			}
-			else
-			{
-				Debug.LogError($"Can't load bundle: {bundleName} (does it exist?), unknown error.");
-				return null;
-			}
+
+			Debug.LogError($"Can't load bundle: {bundleName} (does it exist?), unknown error.");
+			return null;
 		}
 
 		public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
@@ -41,14 +39,7 @@ namespace SamSWAT.FireSupport
 			AssetBundle ab = await LoadBundleAsync(bundle);
 			AssetBundleRequest assetBundleRequest;
 
-			if (assetName == null)
-            {
-				assetBundleRequest = ab.LoadAllAssetsAsync<T>();
-			}
-			else
-            {
-				assetBundleRequest = ab.LoadAssetAsync<T>(assetName);
-			}
+			assetBundleRequest = assetName == null ? ab.LoadAllAssetsAsync<T>() : ab.LoadAssetAsync<T>(assetName);
 
 			while (!assetBundleRequest.isDone)
 				await Task.Yield();
@@ -59,11 +50,9 @@ namespace SamSWAT.FireSupport
 			{
 				return requestedObj;
 			}
-			else
-			{
-				Debug.LogError($"Can't load GameObject from bundle: {bundle}, unknown error.");
-				return null;
-			}
+
+			Debug.LogError($"Can't load GameObject from bundle: {bundle}, unknown error.");
+			return null;
 		}
 
 		public static void UnloadBundle(string bundleName, bool unloadAllLoadedObjects = false)

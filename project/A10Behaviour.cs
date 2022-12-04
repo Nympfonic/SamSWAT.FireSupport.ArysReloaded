@@ -13,24 +13,20 @@ namespace SamSWAT.FireSupport
         [SerializeField] private AudioClip[] gau8ExpSounds;
         [SerializeField] private Transform gau8Transform;
         [SerializeField] private GameObject gau8Particles;
-        [SerializeField] private GameObject _flareCountermeasure;
+        [SerializeField] private GameObject flareCountermeasure;
         private GameObject _flareCountermeasureInstance;
         private bool _strafeRequested;
         private Vector3 _strafeMiddlePos;
-        private static A10Behaviour _instance;
 
-        public static A10Behaviour Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        public static A10Behaviour Instance { get; private set; }
 
         public static async void Load()
         {
-            _instance = Instantiate(await Utils.LoadAssetAsync<GameObject>("assets/content/vehicles/a10_warthog.bundle"), new Vector3(0, -200, 0), Quaternion.identity).GetComponent<A10Behaviour>();
-            _instance.gameObject.SetActive(false);
+            Instance = Instantiate(
+                await Utils.LoadAssetAsync<GameObject>("assets/content/vehicles/a10_warthog.bundle"), 
+                new Vector3(0, -200, 0), 
+                Quaternion.identity).GetComponent<A10Behaviour>();
+            Instance.gameObject.SetActive(false);
         }
 
         public void StartStrafe(Vector3 strafeStartPos, Vector3 strafeEndPos)
@@ -46,7 +42,7 @@ namespace SamSWAT.FireSupport
             engineSource.outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
             engineSource.Play();
             _strafeRequested = true;
-            _flareCountermeasureInstance = Instantiate(_flareCountermeasure, null);
+            _flareCountermeasureInstance = Instantiate(flareCountermeasure, null);
             StartCoroutine(FlySequence());
         }
 
@@ -60,11 +56,22 @@ namespace SamSWAT.FireSupport
             yield return new WaitForSecondsRealtime(1);
             StartCoroutine(Gau8Sequence());
             yield return new WaitForSecondsRealtime(2);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(_strafeMiddlePos, GetRandomClip(gau8ExpSounds), Distance(_strafeMiddlePos), BetterAudio.AudioSourceGroupType.Gunshots, 1200, 1, EOcclusionTest.Regular);
+            Singleton<BetterAudio>.Instance.PlayAtPoint(_strafeMiddlePos, 
+                GetRandomClip(gau8ExpSounds), 
+                Distance(_strafeMiddlePos), 
+                BetterAudio.AudioSourceGroupType.Gunshots, 
+                1200, 
+                1, 
+                EOcclusionTest.Regular);
             gau8Particles.SetActive(false);
             yield return new WaitForSecondsRealtime(5);
             _flareCountermeasureInstance.SetActive(true);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, GetRandomClip(gau8Sound), Distance(gau8Transform.position), BetterAudio.AudioSourceGroupType.Gunshots, 3200, 2, EOcclusionTest.None);
+            Singleton<BetterAudio>.Instance.PlayAtPoint(
+                gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, 
+                GetRandomClip(gau8Sound), Distance(gau8Transform.position), 
+                BetterAudio.AudioSourceGroupType.Gunshots, 
+                3200, 
+                2);
             yield return new WaitForSecondsRealtime(8);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetLeaving);
             yield return new WaitForSecondsRealtime(4);
@@ -79,16 +86,14 @@ namespace SamSWAT.FireSupport
             Vector3 gau8Pos = gau8Transform.position + gau8Transform.forward * 515;
             Vector3 gau8Dir = Vector3.Normalize(_strafeMiddlePos - gau8Pos);
             Vector3 gau8LeftDir = Vector3.Cross(gau8Dir, Vector3.up).normalized;
-            Vector3 projectileDir;
-            Vector3 leftRightSpread;
-            var _projectile = WeaponClass.GetAmmo("ammo_30x173_gau8_avenger");
+            var projectile = WeaponClass.GetAmmo("ammo_30x173_gau8_avenger");
             int counter = 50;
             while (counter > 0)
             {
-                leftRightSpread = gau8LeftDir * Random.Range(-0.007f, 0.007f);
+                Vector3 leftRightSpread = gau8LeftDir * Random.Range(-0.007f, 0.007f);
                 gau8Dir = Vector3.Normalize(gau8Dir + new Vector3(0, 0.00037f, 0));
-                projectileDir = Vector3.Normalize(gau8Dir + leftRightSpread);
-                WeaponClass.FireProjectile(_projectile, gau8Pos, projectileDir, 1);
+                Vector3 projectileDir = Vector3.Normalize(gau8Dir + leftRightSpread);
+                WeaponClass.FireProjectile(projectile, gau8Pos, projectileDir, 1);
                 counter--;
                 yield return new WaitForSecondsRealtime(0.043f);
             }
@@ -96,21 +101,17 @@ namespace SamSWAT.FireSupport
 
         void Update()
         {
-            if (_strafeRequested)
-            {
-                _flareCountermeasureInstance.transform.position = transform.position - transform.forward * 6.5f;
-                _flareCountermeasureInstance.transform.eulerAngles = new Vector3(90, transform.eulerAngles.y, 0);
-                transform.Translate(0, 0, 148 * Time.deltaTime, Space.Self);
-            }
+            if (!_strafeRequested) return;
+
+            var t = transform;
+            _flareCountermeasureInstance.transform.position = t.position - t.forward * 6.5f;
+            _flareCountermeasureInstance.transform.eulerAngles = new Vector3(90, t.eulerAngles.y, 0);
+            transform.Translate(0, 0, 148 * Time.deltaTime, Space.Self);
         }
 
         private float Distance(Vector3 position)
         {
-            if (Camera.main == null)
-            {
-                return float.MaxValue;
-            }
-            return Vector3.Distance(position, Camera.main.transform.position);
+            return Camera.main == null ? float.MaxValue : Vector3.Distance(position, Camera.main.transform.position);
         }
 
         private AudioClip GetRandomClip(AudioClip[] audioClips)
