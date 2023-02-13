@@ -352,3 +352,18 @@ MigrationBackup/
 /.vs
 /obj
 /project/obj
+/project/.idea/
+/project/SamSWAT.FireSupport.csproj.DotSettings
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/.idea.FireSupport.iml
+/contentModel.xml
+/modules.xml
+/projectSettingsUpdater.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+/.idea/
+/project/SamSWAT.FireSupport/.idea/
+/project/SamSWAT.FireSupport/SamSWAT.FireSupport.csproj.DotSettings
