@@ -1,14 +1,14 @@
-﻿using Aki.Reflection.Patching;
+﻿using System.Collections.Generic;
+using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using EFT.Airdrop;
 using EFT.UI.Gestures;
 using System.Linq;
 using System.Reflection;
-using BepInEx.Logging;
-using EFT.InventoryLogic;
+using EFT.InputSystem;
+using HarmonyLib;
 using SamSWAT.FireSupport.Unity;
-using SamSWAT.FireSupport.Utils;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.Patches
@@ -24,28 +24,19 @@ namespace SamSWAT.FireSupport.Patches
         public static async void PatchPostfix(GesturesMenu __instance)
         {
             if (!IsFireSupportAvailable()) return;
-
-            if (!Utils.ItemFactory.Instantiated)
-            {
-                Utils.ItemFactory.Init();
-            }
-
-            WeaponClass.Init();
-            await FireSupportAudio.Load();
-            await FireSupportSpotter.Load();
-            await FireSupportUI.Load(__instance);
-            await A10Behaviour.Load();
-            await UH60Behaviour.Load();
-            __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(true).transform.localPosition = new Vector3(0, -530, 0);
-            FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationReminder);
+            var owner = Singleton<GameWorld>.Instance.RegisteredPlayers[0].GetComponent<GamePlayerOwner>();
+            var fireSupportController = await FireSupportController.Init(__instance);
+            Traverse.Create(owner).Field<List<InputNode>>("_children").Value.Add(fireSupportController);
+            var gesturesBindPanel = __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(true);
+            gesturesBindPanel.transform.localPosition = new Vector3(0, -530, 0);
         }
 
         private static bool IsFireSupportAvailable()
         {
             var gameWorld = Singleton<GameWorld>.Instance;
+            var locationIsSuitable = LocationScene.GetAll<AirdropPoint>().Any();
 
-            if (!Plugin.PluginEnabled.Value || gameWorld == null || FireSupportUI.Instance != null ||
-                !LocationScene.GetAll<AirdropPoint>().Any())
+            if (!Plugin.Enabled.Value || gameWorld == null || FireSupportController.Instance != null || !locationIsSuitable)
             {
                 return false;
             }

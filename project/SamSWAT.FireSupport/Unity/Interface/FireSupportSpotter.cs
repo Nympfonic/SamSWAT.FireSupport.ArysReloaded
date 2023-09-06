@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 using EFT;
 using SamSWAT.FireSupport.Utils;
@@ -15,18 +16,15 @@ namespace SamSWAT.FireSupport.Unity
         private Vector3 _colliderRotation;
         private bool _requestCanceled;
         private GameObject _inputManager;
-        private Transform _mainCamera;
 
-        public static FireSupportSpotter Instance { get; private set; }
-
-        public static async Task Load()
+        public static async Task<FireSupportSpotter> Load()
         {
-            Instance = await UtilsClass.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
-            Instance._inputManager = GameObject.Find("___Input");
-            Instance._mainCamera = Camera.main.transform;
+            var instance = await AssetLoader.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
+            instance._inputManager = GameObject.Find("___Input");
+            return instance;
         }
 
-        public IEnumerator SpotterSequence(ESupportType supportType)
+        public IEnumerator SpotterSequence(ESupportType supportType, Action<bool, Vector3, Vector3> confirmation)
         {
             switch (supportType)
             {
@@ -34,14 +32,14 @@ namespace SamSWAT.FireSupport.Unity
                     yield return StaticManager.BeginCoroutine(SpotterVertical(false));
                     yield return StaticManager.BeginCoroutine(SpotterHorizontal());
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    if (!_requestCanceled)
-                        StaticManager.BeginCoroutine(FireSupportUI.Instance.StrafeRequest(_strafeStartPosition, _strafeEndPosition));
+                    confirmation(_requestCanceled, _strafeStartPosition, _strafeEndPosition);
+                        //StaticManager.BeginCoroutine(FireSupportUI.Instance.StrafeRequest(_strafeStartPosition, _strafeEndPosition));
                     break;
                 case ESupportType.Extract:
                     yield return StaticManager.BeginCoroutine(SpotterVertical(true));
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    if (!_requestCanceled)
-                        StaticManager.BeginCoroutine(FireSupportUI.Instance.ExtractionRequest(_spotterPosition, _colliderRotation));
+                    confirmation(_requestCanceled, _spotterPosition, _colliderRotation);
+                        //StaticManager.BeginCoroutine(FireSupportUI.Instance.ExtractionRequest(_spotterPosition, _colliderRotation));
                     break;
             }
         }
@@ -49,7 +47,7 @@ namespace SamSWAT.FireSupport.Unity
         private IEnumerator SpotterVertical(bool checkSpace)
         {
             _requestCanceled = false;
-            GameObject spotterVertical = Instantiate(spotterParticles[0]);
+            var spotterVertical = Instantiate(spotterParticles[0]);
             var colliderChecker = spotterVertical.GetComponentInChildren<ColliderReporter>();
             yield return new WaitForSecondsRealtime(.1f);
             while (!Input.GetMouseButtonDown(0))
@@ -62,14 +60,15 @@ namespace SamSWAT.FireSupport.Unity
                     FireSupportUI.Instance.SpotterHeliNotice.SetActive(false);
                     yield break;
                 }
-                var forward = _mainCamera.forward;
-                Physics.Raycast(_mainCamera.position + forward, forward, out var hitInfo, 500, 
+
+                var cameraT = CameraClass.Instance.Camera.transform;
+                Physics.Raycast(cameraT.position + cameraT.forward, cameraT.forward, out var hitInfo, 500,
                     LayerMask.GetMask("Terrain", "LowPolyCollider"));
-                FireSupportUI.Instance.SpotterNotice.SetActive(hitInfo.point == Vector3.zero);  
+                FireSupportUI.Instance.SpotterNotice.SetActive(hitInfo.point == Vector3.zero);
                 if (checkSpace && hitInfo.point != Vector3.zero)
                 {
                     FireSupportUI.Instance.SpotterHeliNotice.SetActive(colliderChecker.HasCollision);
-                    
+
                     if (colliderChecker.HasCollision)
                     {
                         var transform = colliderChecker.transform;
@@ -77,9 +76,11 @@ namespace SamSWAT.FireSupport.Unity
                         _colliderRotation = transform.eulerAngles;
                     }
                 }
+
                 spotterVertical.transform.position = hitInfo.point;
                 yield return null;
             }
+
             if (spotterVertical.transform.position == Vector3.zero || checkSpace && colliderChecker.HasCollision)
             {
                 _requestCanceled = true;
@@ -98,8 +99,8 @@ namespace SamSWAT.FireSupport.Unity
         private IEnumerator SpotterHorizontal()
         {
             if (_requestCanceled) yield break;
-            
-            GameObject spotterHorizontal = Instantiate(spotterParticles[1], _spotterPosition, Quaternion.identity);
+
+            var spotterHorizontal = Instantiate(spotterParticles[1], _spotterPosition, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.1f);
             _inputManager.SetActive(false);
             while (!Input.GetMouseButtonDown(0))
@@ -116,6 +117,7 @@ namespace SamSWAT.FireSupport.Unity
                 spotterHorizontal.transform.Rotate(Vector3.down, xAxisRotation);
                 yield return null;
             }
+
             _inputManager.SetActive(true);
             _strafeStartPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (1)").position;
             _strafeEndPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (6)").position;
@@ -126,7 +128,7 @@ namespace SamSWAT.FireSupport.Unity
         {
             if (_requestCanceled) yield break;
             
-            GameObject spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
+            var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.8f);
             Destroy(spotterConfirmation);
         }

@@ -6,6 +6,7 @@ using Aki.Reflection.Patching;
 using Aki.Reflection.Utils;
 using EFT.InventoryLogic;
 using Newtonsoft.Json;
+using SamSWAT.FireSupport.Utils;
 
 namespace SamSWAT.FireSupport.Database
 {
@@ -13,12 +14,13 @@ namespace SamSWAT.FireSupport.Database
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return Utils.ItemFactory.Type.GetField("ItemTemplates").FieldType.GetMethod("Init");
+			return ItemFactoryUtil.Type.GetField("ItemTemplates").FieldType.GetMethod("Init");
 		}
 
 		[PatchPostfix]
 		public static void PatchPostfix(Dictionary<string, ItemTemplate> __instance)
 		{
+			//Utils.ItemFactory.Init();
 			var t = PatchConstants.EftTypes.Single(x => x.GetField("SerializerSettings") != null);
 			var converters = (JsonConverter[]) t.GetField("Converters").GetValue(null);
 

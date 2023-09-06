@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq;
+using System.Reflection;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using EFT;
@@ -13,6 +14,13 @@ namespace SamSWAT.FireSupport.Unity
         private float _timer;
         public string Description => "HeliExfiltrationPoint";
         private Coroutine _coroutine;
+        private MethodInfo _stopSession;
+
+        private HeliExfiltrationPoint()
+        {
+            var t = typeof(EndByExitTrigerScenario).GetNestedTypes().Single(x => x.IsInterface);
+            _stopSession = t.GetMethod("StopSession");
+        }
 
         public void OnTriggerEnter(Collider other)
         {
@@ -32,8 +40,7 @@ namespace SamSWAT.FireSupport.Unity
                 yield return null;
             }
 
-            var t = typeof(EndByExitTrigerScenario).GetNestedTypes().Single(x => x.IsInterface);
-            t.GetMethod("StopSession").Invoke(Singleton<AbstractGame>.Instance, new object[]
+            _stopSession.Invoke(Singleton<AbstractGame>.Instance, new object[]
             {
                 profileId,
                 ExitStatus.Survived,
@@ -45,12 +52,12 @@ namespace SamSWAT.FireSupport.Unity
         {
             var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(other);
             if (player == null || !player.IsYourPlayer) return;
-
-            if (_coroutine != null)
-                StopCoroutine(_coroutine);
             
             _timer = Plugin.HelicopterExtractTime.Value;
             Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Close();
+
+            if (_coroutine == null) return;
+            StopCoroutine(_coroutine);
         }
 
         private void OnDestroy()
@@ -59,6 +66,7 @@ namespace SamSWAT.FireSupport.Unity
             {
                 Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Close();
             }
+
             if (_coroutine == null) return;
             StopCoroutine(_coroutine);
         }

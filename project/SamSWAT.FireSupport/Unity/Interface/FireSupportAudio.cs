@@ -23,14 +23,12 @@ namespace SamSWAT.FireSupport.Unity
         [SerializeField] private AudioClip[] supportHeliLeavingAfterPickup;
         [SerializeField] private AudioClip[] supportHeliLeavingNoPickup;
         
-        public AudioSource AudioSource { get; private set; }
         public static FireSupportAudio Instance { get; private set; }
 
-        public static async Task Load()
+        public static async Task<FireSupportAudio> Load()
         {
-            Instance = await UtilsClass.LoadAssetAsync<FireSupportAudio>("assets/content/ui/firesupport_audio.bundle");
-            Instance.AudioSource = new GameObject("FireSupportAudio").AddComponent<AudioSource>();
-            Instance.AudioSource.volume = Plugin.VoiceoverVolume.Value/100f;
+            Instance = await AssetLoader.LoadAssetAsync<FireSupportAudio>("assets/content/ui/firesupport_audio.bundle");
+            return Instance;
         }
 
         public void PlayVoiceover(EVoiceoverType voiceoverType)
@@ -92,10 +90,11 @@ namespace SamSWAT.FireSupport.Unity
                     break;
             }
 
-            if (voAudioClip != null)
-            {
-                AudioSource.PlayOneShot(voAudioClip);
-            }
+            if (voAudioClip == null) return;
+            
+            var sourceGroup = BetterAudio.AudioSourceGroupType.NonspatialBypass;
+            var volume = Plugin.VoiceoverVolume.Value / 100f;
+            BetterAudio.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
         }
     }
 }

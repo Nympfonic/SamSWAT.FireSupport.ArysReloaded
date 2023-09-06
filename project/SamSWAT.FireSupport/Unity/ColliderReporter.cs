@@ -9,11 +9,13 @@ namespace SamSWAT.FireSupport.Unity
         public bool HasCollision;
         private BoxCollider[] _colliders;
         private Collider[] _intersectedColliders;
+        private int _mask;
 
         private void Start()
         {
             _intersectedColliders = new Collider[5];
             _colliders = GetComponents<BoxCollider>();
+            _mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
         }
         
         private void Update()
@@ -30,7 +32,7 @@ namespace SamSWAT.FireSupport.Unity
                     extents,
                     _intersectedColliders,
                     colRotation,
-                    LayerMask.GetMask("LowPolyCollider", "HighPolyCollider"),
+                    _mask,
                     QueryTriggerInteraction.Ignore);
 
                 if (hits > 0)

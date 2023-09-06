@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
@@ -10,58 +9,45 @@ namespace SamSWAT.FireSupport.Utils
 {
     internal static class WeaponClass
     {
-        private static BallisticsCalculator _ballisticsCalc;
+        private static BallisticsCalculator _calc;
         private static Player _player;
-        private static Weapon _weapon;
-        private static MethodInfo _methodShoot;
-        private static MethodBase _methodCreateShot;
+        private static Weapon _gau8Weapon;
         private static bool _instantiated;
 
+        private static readonly CreateShotDelegate CreateShot;
+        private static readonly Action<BallisticsCalculator, object> Shoot;
+
+        private delegate object CreateShotDelegate(BallisticsCalculator instance, object ammo, Vector3 origin,
+            Vector3 direction, int fireIndex, Player player, Item weapon, float speedFactor = 1f, int fragmentIndex = 0);
+
+        static WeaponClass()
+        {
+            var type = typeof(BallisticsCalculator);
+            var shootMethod = type.GetMethod(nameof(BallisticsCalculator.Shoot));
+            var createShotMethod = type.GetMethod(nameof(BallisticsCalculator.CreateShot));
+            Shoot = AccessToolsUtil.MethodDelegate<Action<BallisticsCalculator, object>>(shootMethod, false);
+            CreateShot = AccessToolsUtil.MethodDelegate<CreateShotDelegate>(createShotMethod);
+        }
+        
         public static void Init()
         {
-            if (_instantiated)
-            {
-                _ballisticsCalc = Singleton<GameWorld>.Instance._sharedBallisticsCalculator;
-                _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
-                _weapon = (Weapon)ItemFactory.CreateItem(
-                    Guid.NewGuid().ToString("N").Substring(0, 24), 
-                    "weapon_ge_gau8_avenger_30x173");
-            }
-            else
-            {
-                _ballisticsCalc = Singleton<GameWorld>.Instance._sharedBallisticsCalculator;
-                Type type = _ballisticsCalc.GetType();
-                _methodShoot = type.GetMethod("Shoot");
-                _methodCreateShot = type.GetMethod("CreateShot");
-                _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
-                _weapon = (Weapon)ItemFactory.CreateItem(
-                    Guid.NewGuid().ToString("N").Substring(0, 24), 
-                    "weapon_ge_gau8_avenger_30x173");
-                _instantiated = true;
-            }
+            _calc = Singleton<GameWorld>.Instance._sharedBallisticsCalculator;
+            _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
+            
+            var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
+            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, "weapon_ge_gau8_avenger_30x173");
         }
 
-        public static void FireProjectile(object ammo, Vector3 shotPosition, Vector3 shotDirection, float speedFactor)
+        public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction, float speedFactor = 1)
         {
-            if (ammo == null)
-                ammo = GetAmmo("ammo_30x173_gau8_avenger");
-            object obj = _methodCreateShot.Invoke(_ballisticsCalc, new[]
-            {
-                ammo, 
-                shotPosition, 
-                shotDirection, 
-                0, 
-                _player, 
-                _weapon, 
-                speedFactor, 
-                0
-            });
-            _methodShoot.Invoke(_ballisticsCalc, new[] { obj });
+            var projectile = CreateShot(_calc, ammo, origin, direction, 0, _player, _gau8Weapon);
+            Shoot(_calc, projectile);
         }
         
         public static object GetAmmo(string tid)
         {
-            return ItemFactory.CreateItem(Guid.NewGuid().ToString("N").Substring(0, 24), tid);
+            var id = Guid.NewGuid().ToString("N").Substring(0, 24);
+            return ItemFactoryUtil.CreateItem(id, tid);
         }
     }
 }

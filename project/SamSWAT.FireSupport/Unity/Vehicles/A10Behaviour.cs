@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Threading.Tasks;
 using Comfort.Common;
 using SamSWAT.FireSupport.Utils;
 using UnityEngine;
@@ -7,60 +6,45 @@ using Random = UnityEngine.Random;
 
 namespace SamSWAT.FireSupport.Unity
 {
-    public class A10Behaviour : MonoBehaviour
+    public class A10Behaviour : MonoBehaviour, IFireSupportOption
     {
-        [SerializeField] private AudioSource engineSource;
-        [SerializeField] private AudioClip[] engineSounds;
+        public AudioSource engineSource;
+        public AudioClip[] engineSounds;
         [SerializeField] private AudioClip[] gau8Sound;
         [SerializeField] private AudioClip[] gau8ExpSounds;
         [SerializeField] private Transform gau8Transform;
         [SerializeField] private GameObject gau8Particles;
         [SerializeField] private GameObject flareCountermeasure;
         private GameObject _flareCountermeasureInstance;
-        private bool _strafeRequested;
-        private Vector3 _strafeMiddlePos;
 
-        public static A10Behaviour Instance { get; private set; }
-
-        public static async Task Load()
+        public void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation)
         {
-            Instance = Instantiate(
-                await UtilsClass.LoadAssetAsync<GameObject>("assets/content/vehicles/a10_warthog.bundle"), 
-                new Vector3(0, -200, 0), 
-                Quaternion.identity).GetComponent<A10Behaviour>();
-            Instance.gameObject.SetActive(false);
-        }
-
-        public void StartStrafe(Vector3 strafeStartPos, Vector3 strafeEndPos)
-        {
-            _strafeMiddlePos = (strafeStartPos + strafeEndPos) / 2;
-            Vector3 strafeBackVector = Vector3.Normalize(strafeStartPos - strafeEndPos);
-            Vector3 a10StartPos = strafeStartPos + strafeBackVector * 2000 + 320 * Vector3.up;
-            Vector3 a10Heading = strafeEndPos - a10StartPos;
+            Vector3 a10StartPos = position + direction * 2000 + 320 * Vector3.up;
+            Vector3 a10Heading = position - a10StartPos;
             float a10YAngle = Mathf.Atan2(a10Heading.x, a10Heading.z) * Mathf.Rad2Deg;
             transform.SetPositionAndRotation(a10StartPos, Quaternion.Euler(0, a10YAngle, 0));
-            gameObject.SetActive(true);
-            engineSource.clip = GetRandomClip(engineSounds);
-            engineSource.outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
-            engineSource.Play();
-            _strafeRequested = true;
             _flareCountermeasureInstance = Instantiate(flareCountermeasure, null);
-            StartCoroutine(FlySequence());
+            StartCoroutine(FlySequence(position));
+        }
+
+        public void ReturnToPool()
+        {
+            gameObject.SetActive(false);
         }
 
         //My main motto for next 2 methods is: if it works - it works (ツ)
-        IEnumerator FlySequence()
+        private IEnumerator FlySequence(Vector3 strafePos)
         {
             _flareCountermeasureInstance.SetActive(false);
             yield return new WaitForSecondsRealtime(3);
             gau8Particles.SetActive(true);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetFiring);
             yield return new WaitForSecondsRealtime(1);
-            StartCoroutine(Gau8Sequence());
+            StartCoroutine(Gau8Sequence(strafePos));
             yield return new WaitForSecondsRealtime(2);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(_strafeMiddlePos, 
+            Singleton<BetterAudio>.Instance.PlayAtPoint(strafePos, 
                 GetRandomClip(gau8ExpSounds), 
-                Distance(_strafeMiddlePos), 
+                CameraClass.Instance.Distance(strafePos), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 1200, 
                 1, 
@@ -70,7 +54,7 @@ namespace SamSWAT.FireSupport.Unity
             _flareCountermeasureInstance.SetActive(true);
             Singleton<BetterAudio>.Instance.PlayAtPoint(
                 gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, 
-                GetRandomClip(gau8Sound), Distance(gau8Transform.position), 
+                GetRandomClip(gau8Sound), CameraClass.Instance.Distance(gau8Transform.position), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 3200, 
                 2);
@@ -79,14 +63,13 @@ namespace SamSWAT.FireSupport.Unity
             yield return new WaitForSecondsRealtime(4);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationStrafeEnd);
             yield return new WaitForSecondsRealtime(4);
-            _strafeRequested = false;
-            gameObject.SetActive(false);
+            ReturnToPool();
         }
 
-        IEnumerator Gau8Sequence()
+        private IEnumerator Gau8Sequence(Vector3 strafePos)
         {
             Vector3 gau8Pos = gau8Transform.position + gau8Transform.forward * 515;
-            Vector3 gau8Dir = Vector3.Normalize(_strafeMiddlePos - gau8Pos);
+            Vector3 gau8Dir = Vector3.Normalize(strafePos - gau8Pos);
             Vector3 gau8LeftDir = Vector3.Cross(gau8Dir, Vector3.up).normalized;
             var projectile = WeaponClass.GetAmmo("ammo_30x173_gau8_avenger");
             int counter = 50;
@@ -95,25 +78,20 @@ namespace SamSWAT.FireSupport.Unity
                 Vector3 leftRightSpread = gau8LeftDir * Random.Range(-0.007f, 0.007f);
                 gau8Dir = Vector3.Normalize(gau8Dir + new Vector3(0, 0.00037f, 0));
                 Vector3 projectileDir = Vector3.Normalize(gau8Dir + leftRightSpread);
-                WeaponClass.FireProjectile(projectile, gau8Pos, projectileDir, 1);
+                WeaponClass.FireProjectile(projectile, gau8Pos, projectileDir);
                 counter--;
                 yield return new WaitForSecondsRealtime(0.043f);
             }
         }
 
-        void Update()
+        private void Update()
         {
-            if (!_strafeRequested) return;
+            if (!gameObject.activeSelf) return;
 
             var t = transform;
             _flareCountermeasureInstance.transform.position = t.position - t.forward * 6.5f;
             _flareCountermeasureInstance.transform.eulerAngles = new Vector3(90, t.eulerAngles.y, 0);
             transform.Translate(0, 0, 148 * Time.deltaTime, Space.Self);
-        }
-
-        private float Distance(Vector3 position)
-        {
-            return Camera.main == null ? float.MaxValue : Vector3.Distance(position, Camera.main.transform.position);
         }
 
         private AudioClip GetRandomClip(AudioClip[] audioClips)

@@ -2,10 +2,9 @@
 using BepInEx.Configuration;
 using SamSWAT.FireSupport.Database;
 using SamSWAT.FireSupport.Patches;
-using System;
 using System.IO;
 using System.Reflection;
-using SamSWAT.FireSupport.Unity;
+using BepInEx.Logging;
 
 namespace SamSWAT.FireSupport
 {
@@ -13,7 +12,8 @@ namespace SamSWAT.FireSupport
     public class Plugin : BaseUnityPlugin
     {
         public static string Directory;
-        internal static ConfigEntry<bool> PluginEnabled;
+        internal static ManualLogSource Logger;
+        internal static ConfigEntry<bool> Enabled;
         internal static ConfigEntry<int> AmountOfStrafeRequests;
         internal static ConfigEntry<int> AmountOfExtractionRequests;
         internal static ConfigEntry<int> HelicopterWaitTime;
@@ -24,13 +24,15 @@ namespace SamSWAT.FireSupport
 
         private void Awake()
         {
+            Logger = base.Logger;
             //Directory = Path.Combine(BepInEx.Paths.PluginPath, "SamSWAT.FireSupport/").Replace("\\", "/");
             Directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/";
             new GesturesMenuPatch().Enable();
             new AddItemToDatabasePatch().Enable();
             new AddLocaleToDatabasePatch().Enable();
+            new Utils.ItemFactoryUtil().Enable();
 
-            PluginEnabled = Config.Bind(
+            Enabled = Config.Bind(
                 "",
                 "Plugin state",
                 true,
@@ -77,14 +79,6 @@ namespace SamSWAT.FireSupport
                 90,
                 new ConfigDescription("",
                 new AcceptableValueRange<int>(0, 100)));
-            VoiceoverVolume.SettingChanged += VoiceoverVolume_SettingChanged;
-        }
-
-        private static void VoiceoverVolume_SettingChanged(object sender, EventArgs e)
-        {
-            if (FireSupportAudio.Instance == null)
-                return;
-            FireSupportAudio.Instance.AudioSource.volume = (float)VoiceoverVolume.Value/100;
         }
     }
 }

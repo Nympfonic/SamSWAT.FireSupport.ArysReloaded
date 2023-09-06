@@ -1,50 +1,33 @@
 ﻿using System.Collections;
-using System.Threading.Tasks;
-using Comfort.Common;
-using SamSWAT.FireSupport.Utils;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.Unity
 {
-    public class UH60Behaviour : MonoBehaviour
+    public class UH60Behaviour : MonoBehaviour, IFireSupportOption
     {
-        [SerializeField] private Animator helicopterAnimator;
-        [SerializeField] private AnimationCurve volumeCurve;
-        [SerializeField] private AudioSource engineCloseSource;
-        [SerializeField] private AudioSource engineDistantSource;
-        [SerializeField] private AudioSource rotorsCloseSource;
-        [SerializeField] private AudioSource rotorsDistantSource;
-        private Transform _mainCamera;
-        private GameObject _extractionPoint;
         private static readonly int FlySpeedMultiplier = Animator.StringToHash("FlySpeedMultiplier");
         private static readonly int FlyAway = Animator.StringToHash("FlyAway");
+        [SerializeField] private Animator helicopterAnimator;
+        [SerializeField] private AnimationCurve volumeCurve;
+        public AudioSource engineCloseSource;
+        public AudioSource engineDistantSource;
+        public AudioSource rotorsCloseSource;
+        public AudioSource rotorsDistantSource;
+        private GameObject _extractionPoint;
 
-        public static UH60Behaviour Instance { get; private set; }
-
-        public static async Task Load()
-        {
-            Instance = Instantiate(
-                await UtilsClass.LoadAssetAsync<GameObject>("assets/content/vehicles/uh60_blackhawk.bundle"), 
-                new Vector3(0, -200, 0), 
-                Quaternion.identity).GetComponent<UH60Behaviour>();
-            Instance.gameObject.SetActive(false);
-            Instance._mainCamera = Camera.main.transform;
-            var outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
-            Instance.engineCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            Instance.engineDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            Instance.rotorsCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            Instance.rotorsDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
-        }
-
-        public void StartExtraction(Vector3 epPosition, Vector3 rotation)
+        public void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation)
         {
             var heliTransform = transform;
-            heliTransform.position = epPosition;
+            heliTransform.position = position;
             heliTransform.eulerAngles = rotation;
-            gameObject.SetActive(true);
             helicopterAnimator.SetFloat(FlySpeedMultiplier, Plugin.HelicopterSpeedMultiplier.Value);
         }
-        
+
+        public void ReturnToPool()
+        {
+            gameObject.SetActive(false);
+        }
+
         private void Update()
         {
             CrossFadeAudio();
@@ -52,7 +35,7 @@ namespace SamSWAT.FireSupport.Unity
         
         private void CrossFadeAudio()
         {
-            float distance = Vector3.Distance(_mainCamera.position, rotorsCloseSource.transform.position);
+            float distance = CameraClass.Instance.Distance(rotorsCloseSource.transform.position);
             float volume = volumeCurve.Evaluate(distance);
 
             rotorsCloseSource.volume = volume;
@@ -76,7 +59,7 @@ namespace SamSWAT.FireSupport.Unity
 
         private void OnHelicopterLeft()
         {
-            gameObject.SetActive(false);
+            ReturnToPool();
         }
 
         private void CreateExfilPoint()

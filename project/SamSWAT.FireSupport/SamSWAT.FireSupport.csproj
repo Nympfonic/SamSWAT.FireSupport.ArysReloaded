@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\References\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Aki.Reflection, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\References\Aki.Reflection.dll</HintPath>
     </Reference>
@@ -90,7 +93,10 @@
     <Compile Include="Unity\ColliderReporter.cs" />
     <Compile Include="Unity\ESupportType.cs" />
     <Compile Include="Unity\EVoiceoverType.cs" />
+    <Compile Include="Unity\FireSupportController.cs" />
+    <Compile Include="Unity\FireSupportPool.cs" />
     <Compile Include="Unity\HeliExfiltrationPoint.cs" />
+    <Compile Include="Unity\IFireSupportOption.cs" />
     <Compile Include="Unity\Interface\FireSupportAudio.cs" />
     <Compile Include="Unity\Interface\FireSupportSpotter.cs" />
     <Compile Include="Unity\Interface\FireSupportUI.cs" />
@@ -98,8 +104,9 @@
     <Compile Include="Unity\SimpleSpinBlur.cs" />
     <Compile Include="Unity\Vehicles\A10Behaviour.cs" />
     <Compile Include="Unity\Vehicles\UH60Behaviour.cs" />
-    <Compile Include="Utils\ItemFactory.cs" />
-    <Compile Include="Utils\UtilsClass.cs" />
+    <Compile Include="Utils\AccessToolsUtil.cs" />
+    <Compile Include="Utils\ItemFactoryUtil.cs" />
+    <Compile Include="Utils\AssetLoader.cs" />
     <Compile Include="Utils\WeaponClass.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
