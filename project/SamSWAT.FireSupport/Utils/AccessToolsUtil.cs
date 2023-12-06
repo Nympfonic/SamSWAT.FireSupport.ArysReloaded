@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace SamSWAT.FireSupport.Utils
+namespace SamSWAT.FireSupport.ArysReloaded.Utils
 {
     internal static class AccessToolsUtil
     {

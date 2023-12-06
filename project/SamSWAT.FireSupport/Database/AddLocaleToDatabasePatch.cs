@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace SamSWAT.FireSupport.Database
+namespace SamSWAT.FireSupport.ArysReloaded.Database
 {
     public class AddLocaleToDatabasePatch : ModulePatch
     {

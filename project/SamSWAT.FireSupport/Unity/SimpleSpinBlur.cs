@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class SimpleSpinBlur : MonoBehaviour
     {

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Threading.Tasks;
-using Comfort.Common;
 using EFT;
-//using EFT.CameraControl;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class FireSupportSpotter : ScriptableObject
     {
@@ -35,13 +33,11 @@ namespace SamSWAT.FireSupport.Unity
                     yield return StaticManager.BeginCoroutine(SpotterHorizontal());
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
                     confirmation(_requestCanceled, _strafeStartPosition, _strafeEndPosition);
-                        //StaticManager.BeginCoroutine(FireSupportUI.Instance.StrafeRequest(_strafeStartPosition, _strafeEndPosition));
                     break;
                 case ESupportType.Extract:
                     yield return StaticManager.BeginCoroutine(SpotterVertical(true));
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
                     confirmation(_requestCanceled, _spotterPosition, _colliderRotation);
-                        //StaticManager.BeginCoroutine(FireSupportUI.Instance.ExtractionRequest(_spotterPosition, _colliderRotation));
                     break;
             }
         }

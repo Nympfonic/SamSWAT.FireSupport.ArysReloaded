@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace SamSWAT.FireSupport.Utils
+namespace SamSWAT.FireSupport.ArysReloaded.Utils
 {
 	internal static class AssetLoader
 	{
@@ -80,7 +80,9 @@ namespace SamSWAT.FireSupport.Utils
 			foreach (var bundle in LoadedBundles.Values)
 			{
 				bundle.Unload(true);
-			}
-		}
+            }
+
+            LoadedBundles.Clear();
+        }
 	}
 }

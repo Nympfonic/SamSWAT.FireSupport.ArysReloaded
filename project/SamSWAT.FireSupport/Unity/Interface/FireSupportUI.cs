@@ -4,12 +4,12 @@ using Comfort.Common;
 using EFT;
 using EFT.UI;
 using EFT.UI.Gestures;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {

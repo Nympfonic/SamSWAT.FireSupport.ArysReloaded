@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class UH60Behaviour : MonoBehaviour, IFireSupportOption
     {

@@ -5,7 +5,7 @@ using EFT.Ballistics;
 using EFT.InventoryLogic;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Utils
+namespace SamSWAT.FireSupport.ArysReloaded.Utils
 {
     internal static class WeaponClass
     {
@@ -33,7 +33,7 @@ namespace SamSWAT.FireSupport.Utils
         {
             var gameWorld = Singleton<GameWorld>.Instance;
             _calc = gameWorld._sharedBallisticsCalculator;
-            _player = gameWorld.MainPlayer.AccountId;
+            _player = gameWorld.MainPlayer.ProfileId;
             
             var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
             _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, "weapon_ge_gau8_avenger_30x173");
@@ -48,7 +48,7 @@ namespace SamSWAT.FireSupport.Utils
         public static object GetAmmo(string tid)
         {
             var id = Guid.NewGuid().ToString("N").Substring(0, 24);
-            return (BulletClass)ItemFactoryUtil.CreateItem(id, tid);
+            return ItemFactoryUtil.CreateItem(id, tid);
         }
     }
 }

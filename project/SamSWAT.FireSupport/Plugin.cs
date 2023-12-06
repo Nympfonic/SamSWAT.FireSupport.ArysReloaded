@@ -1,14 +1,14 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using SamSWAT.FireSupport.Database;
-using SamSWAT.FireSupport.Patches;
+using BepInEx.Logging;
+using SamSWAT.FireSupport.ArysReloaded.Database;
+using SamSWAT.FireSupport.ArysReloaded.Patches;
 using System.IO;
 using System.Reflection;
-using BepInEx.Logging;
 
-namespace SamSWAT.FireSupport
+namespace SamSWAT.FireSupport.ArysReloaded
 {
-    [BepInPlugin("com.SamSWAT.FireSupport", "SamSWAT.FireSupport", "2.1.0")]
+    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static string Directory;

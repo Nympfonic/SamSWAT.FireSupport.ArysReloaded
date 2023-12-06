@@ -4,10 +4,10 @@ using EFT;
 using EFT.InputSystem;
 using EFT.UI;
 using EFT.UI.Gestures;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class FireSupportController : UIInputNode
     {
@@ -21,7 +21,7 @@ namespace SamSWAT.FireSupport.Unity
         public static FireSupportController Instance { get; private set; }
         public bool StrafeRequestAvailable => _requestAvailable && AvailableStrafeRequests > 0;
         public bool ExtractRequestAvailable => _requestAvailable && AvailableExtractRequests > 0;
-        public bool AnyRequestAvailable => _requestAvailable && AvailableStrafeRequests > 0 && AvailableExtractRequests > 0;
+        public bool AnyRequestAvailable => _requestAvailable && (AvailableStrafeRequests > 0 || AvailableExtractRequests > 0);
         public int AvailableStrafeRequests { get; private set; }
         public int AvailableExtractRequests { get; private set; }
 
@@ -48,7 +48,7 @@ namespace SamSWAT.FireSupport.Unity
                 case ESupportType.Strafe:
                     if (StrafeRequestAvailable)
                     {
-                        base.Close();
+                        _gesturesMenu.Close();
                         StaticManager.BeginCoroutine(_spotter.SpotterSequence(ESupportType.Strafe, (b, startPos, endPos) =>
                         {
                             if (!b)
@@ -59,7 +59,7 @@ namespace SamSWAT.FireSupport.Unity
                 case ESupportType.Extract:
                     if (ExtractRequestAvailable)
                     {
-                        base.Close();
+                        _gesturesMenu.Close();
                         StaticManager.BeginCoroutine(_spotter.SpotterSequence(ESupportType.Extract, (b, pos, rot) =>
                         {
                             if (!b)
@@ -68,8 +68,6 @@ namespace SamSWAT.FireSupport.Unity
                     }
                     break;
             }
-
-            _gesturesMenu.Close(); // close the gestures menu upon successful support request
         }
         
         private IEnumerator StrafeRequest(Vector3 strafeStartPos, Vector3 strafeEndPos)

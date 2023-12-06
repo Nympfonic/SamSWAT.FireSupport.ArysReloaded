@@ -5,7 +5,7 @@ using Aki.Reflection.Patching;
 using Aki.Reflection.Utils;
 using EFT.InventoryLogic;
 
-namespace SamSWAT.FireSupport.Utils
+namespace SamSWAT.FireSupport.ArysReloaded.Utils
 {
     internal class ItemFactoryUtil : ModulePatch
     {

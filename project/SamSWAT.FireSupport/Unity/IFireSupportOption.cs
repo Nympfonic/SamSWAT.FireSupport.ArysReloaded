@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public interface IFireSupportOption
     {

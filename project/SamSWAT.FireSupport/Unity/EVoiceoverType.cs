@@ -1,4 +1,4 @@
-﻿namespace SamSWAT.FireSupport.Unity
+﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public enum EVoiceoverType
     {

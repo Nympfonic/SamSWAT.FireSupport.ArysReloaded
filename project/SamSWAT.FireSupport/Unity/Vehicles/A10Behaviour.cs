@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using Comfort.Common;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class A10Behaviour : MonoBehaviour, IFireSupportOption
     {
@@ -90,6 +90,7 @@ namespace SamSWAT.FireSupport.Unity
         private void Update()
         {
             if (!gameObject.activeSelf) return;
+            if (_flareCountermeasureInstance == null) return;
 
             var t = transform;
             _flareCountermeasureInstance.transform.position = t.position - t.forward * 6.5f;

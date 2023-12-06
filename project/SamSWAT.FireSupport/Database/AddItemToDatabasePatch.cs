@@ -6,9 +6,9 @@ using Aki.Reflection.Patching;
 using Aki.Reflection.Utils;
 using EFT.InventoryLogic;
 using Newtonsoft.Json;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 
-namespace SamSWAT.FireSupport.Database
+namespace SamSWAT.FireSupport.ArysReloaded.Database
 {
 	public class AddItemToDatabasePatch : ModulePatch
 	{

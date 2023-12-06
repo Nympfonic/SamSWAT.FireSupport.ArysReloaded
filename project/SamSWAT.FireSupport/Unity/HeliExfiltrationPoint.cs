@@ -7,7 +7,7 @@ using EFT;
 using EFT.UI;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class HeliExfiltrationPoint : MonoBehaviour, IPhysicsTrigger
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class ColliderReporter : MonoBehaviour
     {

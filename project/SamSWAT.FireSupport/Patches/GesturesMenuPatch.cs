@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using EFT.Airdrop;
-using EFT.UI.Gestures;
-using System.Linq;
-using System.Reflection;
 using EFT.InputSystem;
+using EFT.UI.Gestures;
 using HarmonyLib;
-using SamSWAT.FireSupport.Unity;
+using SamSWAT.FireSupport.ArysReloaded.Unity;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Patches
+namespace SamSWAT.FireSupport.ArysReloaded.Patches
 {
     public class GesturesMenuPatch : ModulePatch
     {

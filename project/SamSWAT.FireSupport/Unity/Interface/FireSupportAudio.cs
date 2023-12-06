@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Comfort.Common;
-using SamSWAT.FireSupport.Utils;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class FireSupportAudio : ScriptableObject
     {
