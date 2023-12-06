@@ -16,6 +16,7 @@ namespace SamSWAT.FireSupport.Unity
         private FireSupportAudio _audio;
         private FireSupportUI _ui;
         private FireSupportSpotter _spotter;
+        private GesturesMenu _gesturesMenu;
         
         public static FireSupportController Instance { get; private set; }
         public bool StrafeRequestAvailable => _requestAvailable && AvailableStrafeRequests > 0;
@@ -30,6 +31,7 @@ namespace SamSWAT.FireSupport.Unity
             Instance._audio = await FireSupportAudio.Load();
             Instance._spotter = await FireSupportSpotter.Load();
             Instance._ui = await FireSupportUI.Load(gesturesMenu);
+            Instance._gesturesMenu = gesturesMenu;
             await FireSupportPool.LoadBundlesAndCreatePools();
             WeaponClass.Init();
             Instance.AvailableStrafeRequests = Plugin.AmountOfStrafeRequests.Value;
@@ -66,6 +68,8 @@ namespace SamSWAT.FireSupport.Unity
                     }
                     break;
             }
+
+            _gesturesMenu.Close(); // close the gestures menu upon successful support request
         }
         
         private IEnumerator StrafeRequest(Vector3 strafeStartPos, Vector3 strafeEndPos)

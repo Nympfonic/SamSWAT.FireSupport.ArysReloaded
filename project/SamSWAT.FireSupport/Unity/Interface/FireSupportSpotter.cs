@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
+//using EFT.CameraControl;
 using SamSWAT.FireSupport.Utils;
 using UnityEngine;
 
@@ -61,7 +63,7 @@ namespace SamSWAT.FireSupport.Unity
                     yield break;
                 }
 
-                var cameraT = CameraClass.Instance.Camera.transform;
+                var cameraT = Camera.current.transform;
                 Physics.Raycast(cameraT.position + cameraT.forward, cameraT.forward, out var hitInfo, 500,
                     LayerMask.GetMask("Terrain", "LowPolyCollider"));
                 FireSupportUI.Instance.SpotterNotice.SetActive(hitInfo.point == Vector3.zero);

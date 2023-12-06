@@ -24,7 +24,7 @@ namespace SamSWAT.FireSupport.Patches
         public static async void PatchPostfix(GesturesMenu __instance)
         {
             if (!IsFireSupportAvailable()) return;
-            var owner = Singleton<GameWorld>.Instance.RegisteredPlayers[0].GetComponent<GamePlayerOwner>();
+            var owner = Singleton<GameWorld>.Instance.MainPlayer.GetComponent<GamePlayerOwner>();
             var fireSupportController = await FireSupportController.Init(__instance);
             Traverse.Create(owner).Field<List<InputNode>>("_children").Value.Add(fireSupportController);
             var gesturesBindPanel = __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(true);

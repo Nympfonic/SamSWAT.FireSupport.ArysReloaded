@@ -35,7 +35,7 @@ namespace SamSWAT.FireSupport.Unity
         
         private void CrossFadeAudio()
         {
-            float distance = CameraClass.Instance.Distance(rotorsCloseSource.transform.position);
+            float distance = Vector3.Distance(Camera.current.transform.position, rotorsCloseSource.transform.position);
             float volume = volumeCurve.Evaluate(distance);
 
             rotorsCloseSource.volume = volume;

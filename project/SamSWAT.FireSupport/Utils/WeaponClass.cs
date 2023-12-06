@@ -10,7 +10,7 @@ namespace SamSWAT.FireSupport.Utils
     internal static class WeaponClass
     {
         private static BallisticsCalculator _calc;
-        private static Player _player;
+        private static string _player;
         private static Weapon _gau8Weapon;
         private static bool _instantiated;
 
@@ -18,7 +18,7 @@ namespace SamSWAT.FireSupport.Utils
         private static readonly Action<BallisticsCalculator, object> Shoot;
 
         private delegate object CreateShotDelegate(BallisticsCalculator instance, object ammo, Vector3 origin,
-            Vector3 direction, int fireIndex, Player player, Item weapon, float speedFactor = 1f, int fragmentIndex = 0);
+            Vector3 direction, int fireIndex, string player, Item weapon, float speedFactor = 1f, int fragmentIndex = 0);
 
         static WeaponClass()
         {
@@ -31,14 +31,15 @@ namespace SamSWAT.FireSupport.Utils
         
         public static void Init()
         {
-            _calc = Singleton<GameWorld>.Instance._sharedBallisticsCalculator;
-            _player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
+            var gameWorld = Singleton<GameWorld>.Instance;
+            _calc = gameWorld._sharedBallisticsCalculator;
+            _player = gameWorld.MainPlayer.AccountId;
             
             var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
             _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, "weapon_ge_gau8_avenger_30x173");
         }
 
-        public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction, float speedFactor = 1)
+        public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction)
         {
             var projectile = CreateShot(_calc, ammo, origin, direction, 0, _player, _gau8Weapon);
             Shoot(_calc, projectile);
@@ -47,7 +48,7 @@ namespace SamSWAT.FireSupport.Utils
         public static object GetAmmo(string tid)
         {
             var id = Guid.NewGuid().ToString("N").Substring(0, 24);
-            return ItemFactoryUtil.CreateItem(id, tid);
+            return (BulletClass)ItemFactoryUtil.CreateItem(id, tid);
         }
     }
 }

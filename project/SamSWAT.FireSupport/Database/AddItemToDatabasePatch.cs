@@ -20,7 +20,6 @@ namespace SamSWAT.FireSupport.Database
 		[PatchPostfix]
 		public static void PatchPostfix(Dictionary<string, ItemTemplate> __instance)
 		{
-			//Utils.ItemFactory.Init();
 			var t = PatchConstants.EftTypes.Single(x => x.GetField("SerializerSettings") != null);
 			var converters = (JsonConverter[]) t.GetField("Converters").GetValue(null);
 

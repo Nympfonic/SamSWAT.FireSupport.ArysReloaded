@@ -1,3 +1,11 @@
+# Disclaimer
+
+This mod was originally made by <a href="https://github.com/SamSWAT911">SamSWAT911</a>.
+
+In their absence, I have decided to update the beloved FireSupport mod for 3.7.4; it will likely work with 3.7.1 to 3.7.4, but I have not tested the others besides 3.7.4.
+
+At the moment, I have no plans to release a version for 3.6.x.
+
 <a href="#"><img src="https://media.discordapp.net/attachments/417281262085210112/1013842879715749999/140818-F-PO994-258-scaled.jpg?width=1440&height=450"></a>
 
 # Fire Support

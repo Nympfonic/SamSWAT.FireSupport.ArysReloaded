@@ -8,11 +8,11 @@ using BepInEx.Logging;
 
 namespace SamSWAT.FireSupport
 {
-    [BepInPlugin("com.SamSWAT.FireSupport", "SamSWAT.FireSupport", "2.0.0")]
+    [BepInPlugin("com.SamSWAT.FireSupport", "SamSWAT.FireSupport", "2.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static string Directory;
-        internal static ManualLogSource Logger;
+        internal static ManualLogSource LogSource;
         internal static ConfigEntry<bool> Enabled;
         internal static ConfigEntry<int> AmountOfStrafeRequests;
         internal static ConfigEntry<int> AmountOfExtractionRequests;
@@ -24,8 +24,7 @@ namespace SamSWAT.FireSupport
 
         private void Awake()
         {
-            Logger = base.Logger;
-            //Directory = Path.Combine(BepInEx.Paths.PluginPath, "SamSWAT.FireSupport/").Replace("\\", "/");
+            LogSource = Logger;
             Directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/";
             new GesturesMenuPatch().Enable();
             new AddItemToDatabasePatch().Enable();

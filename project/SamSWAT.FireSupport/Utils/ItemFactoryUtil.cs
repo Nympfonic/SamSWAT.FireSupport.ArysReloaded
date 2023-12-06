@@ -36,7 +36,5 @@ namespace SamSWAT.FireSupport.Utils
 		{
 			return _createItemDelegate(_instance, id, tplId);
 		}
-
-		
     }
 }

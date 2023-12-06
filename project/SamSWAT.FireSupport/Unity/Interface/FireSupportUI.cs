@@ -30,8 +30,8 @@ namespace SamSWAT.FireSupport.Unity
         public static async Task<FireSupportUI> Load(GesturesMenu gesturesMenu)
         {
             Instance = Instantiate(await AssetLoader.LoadAssetAsync("assets/content/ui/firesupport_ui.bundle")).GetComponent<FireSupportUI>();
-            Instance._player = Singleton<GameWorld>.Instance.RegisteredPlayers[0];
-            
+            Instance._player = Singleton<GameWorld>.Instance.MainPlayer;
+
             var fireSupportUiT = Instance.transform;
             fireSupportUiT.parent = gesturesMenu.transform;
             fireSupportUiT.localPosition = new Vector3(0, -255, 0);

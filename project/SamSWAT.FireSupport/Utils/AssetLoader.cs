@@ -31,7 +31,7 @@ namespace SamSWAT.FireSupport.Utils
 				return requestedBundle;
 			}
 
-			Plugin.Logger.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
+			Plugin.LogSource.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
 			return null;
 		}
 
@@ -53,7 +53,7 @@ namespace SamSWAT.FireSupport.Utils
 
 			if (assetBundleRequest.allAssets.Length == 0)
 			{
-				Plugin.Logger.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
+				Plugin.LogSource.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
 				return null;
 			}
 			
@@ -71,7 +71,7 @@ namespace SamSWAT.FireSupport.Utils
             }
 			else
 			{
-				Plugin.Logger.LogError($"AssetBundle '{bundleName}' already unloaded");
+				Plugin.LogSource.LogError($"AssetBundle '{bundleName}' already unloaded");
 			}
 		}
 

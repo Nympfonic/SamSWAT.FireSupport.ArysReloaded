@@ -35,6 +35,7 @@ namespace SamSWAT.FireSupport.Unity
         //My main motto for next 2 methods is: if it works - it works (ツ)
         private IEnumerator FlySequence(Vector3 strafePos)
         {
+            var betterAudio = Singleton<BetterAudio>.Instance;
             _flareCountermeasureInstance.SetActive(false);
             yield return new WaitForSecondsRealtime(3);
             gau8Particles.SetActive(true);
@@ -42,9 +43,10 @@ namespace SamSWAT.FireSupport.Unity
             yield return new WaitForSecondsRealtime(1);
             StartCoroutine(Gau8Sequence(strafePos));
             yield return new WaitForSecondsRealtime(2);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(strafePos, 
+            betterAudio.PlayAtPoint(
+                strafePos, 
                 GetRandomClip(gau8ExpSounds), 
-                CameraClass.Instance.Distance(strafePos), 
+                Vector3.Distance(Camera.current.transform.position, strafePos), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 1200, 
                 1, 
@@ -52,9 +54,10 @@ namespace SamSWAT.FireSupport.Unity
             gau8Particles.SetActive(false);
             yield return new WaitForSecondsRealtime(5);
             _flareCountermeasureInstance.SetActive(true);
-            Singleton<BetterAudio>.Instance.PlayAtPoint(
+            betterAudio.PlayAtPoint(
                 gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, 
-                GetRandomClip(gau8Sound), CameraClass.Instance.Distance(gau8Transform.position), 
+                GetRandomClip(gau8Sound), 
+                Vector3.Distance(Camera.current.transform.position, gau8Transform.position), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 3200, 
                 2);

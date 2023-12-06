@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Comfort.Common;
 using SamSWAT.FireSupport.Utils;
 using UnityEngine;
 
@@ -92,9 +93,9 @@ namespace SamSWAT.FireSupport.Unity
 
             if (voAudioClip == null) return;
             
-            var sourceGroup = BetterAudio.AudioSourceGroupType.NonspatialBypass;
+            var sourceGroup = BetterAudio.AudioSourceGroupType.Nonspatial;
             var volume = Plugin.VoiceoverVolume.Value / 100f;
-            BetterAudio.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
+            Singleton<BetterAudio>.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
         }
     }
 }
