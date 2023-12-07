@@ -56,8 +56,8 @@ Full video demonstration of this mod on YouTube:
 
 ### How to install
 
-1. Download the latest release here: [link](https://github.com/SamSWAT911/FireSupport/releases) -OR- build from source (instructions below)
-2. Extract the zip file and drop the whole folder `SamSWAT.FireSupport` into `BepInEx/plugins/` directory.
+1. Download the latest release here: [link](https://github.com/Nympfonic/SamSWAT.FireSupport.ArysReloaded/releases) -OR- build from source (instructions below)
+2. Extract the 7z file and drop the whole folder `SamSWAT.FireSupport.ArysReloaded` into `BepInEx/plugins/` directory.
 
 ### Requirements
 
@@ -70,8 +70,8 @@ Full video demonstration of this mod on YouTube:
 2. VisualStudio > File > Open solution > `SamSWAT.FireSupport.sln`
 3. Change references to your ones from EFT `Managed` folder
 4. VisualStudio > Build > Rebuild solution
-5. `SamSWAT.FireSupport.dll` should appear in `bin\Debug` directory
-6. Copy `SamSWAT.FireSupport.dll` into `mod/SamSWAT.FireSupport` folder
+5. `SamSWAT.FireSupport.ArysReloaded.dll` should appear in `bin\Debug` directory
+6. Copy `SamSWAT.FireSupport.ArysReloaded.dll` into `mod/SamSWAT.FireSupport.ArysReloaded` folder
 7. Extract `assets.7z` with `here` option
 8. Delete archive after extraction
-9. Copy whole `SamSWAT.FireSupport` folder into `BepInEx/plugins/`
+9. Copy whole `SamSWAT.FireSupport.ArysReloaded` folder into `BepInEx/plugins/`
