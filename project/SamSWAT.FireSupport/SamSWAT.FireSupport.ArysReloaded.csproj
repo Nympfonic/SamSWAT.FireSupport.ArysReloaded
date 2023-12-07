@@ -117,6 +117,7 @@
     <Compile Include="Unity\Interface\FireSupportSpotter.cs" />
     <Compile Include="Unity\Interface\FireSupportUI.cs" />
     <Compile Include="Unity\Interface\FireSupportUIElement.cs" />
+    <Compile Include="Unity\ItemConstants.cs" />
     <Compile Include="Unity\SimpleSpinBlur.cs" />
     <Compile Include="Unity\Vehicles\A10Behaviour.cs" />
     <Compile Include="Unity\Vehicles\UH60Behaviour.cs" />

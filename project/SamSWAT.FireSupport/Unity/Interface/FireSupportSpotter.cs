@@ -17,11 +17,13 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private Vector3 _colliderRotation;
         private bool _requestCanceled;
         private GameObject _inputManager;
+        private Player _player;
 
         public static async Task<FireSupportSpotter> Load()
         {
             var instance = await AssetLoader.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
             instance._inputManager = GameObject.Find("___Input");
+            instance._player = Singleton<GameWorld>.Instance.MainPlayer;
             return instance;
         }
 
@@ -51,7 +53,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             yield return new WaitForSecondsRealtime(.1f);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
+                if (isRequestCancelled())
                 {
                     Destroy(spotterVertical);
                     _requestCanceled = true;
@@ -60,7 +62,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     yield break;
                 }
 
-                var cameraT = Singleton<GameWorld>.Instance.MainPlayer.CameraPosition;
+                var cameraT = _player.CameraPosition;
                 Physics.Raycast(cameraT.position + cameraT.forward, cameraT.forward, out var hitInfo, 500,
                     LayerMask.GetMask("Terrain", "LowPolyCollider"));
                 FireSupportUI.Instance.SpotterNotice.SetActive(hitInfo.point == Vector3.zero);
@@ -104,7 +106,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             _inputManager.SetActive(false);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
+                if (isRequestCancelled())
                 {
                     Destroy(spotterHorizontal);
                     _inputManager.SetActive(true);
@@ -129,6 +131,17 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.8f);
             Destroy(spotterConfirmation);
+        }
+
+        private bool isRequestCancelled()
+        {
+            if ((Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
+                || _player.HandsController.Item.TemplateId != ItemConstants.RANGEFINDER_TPL)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

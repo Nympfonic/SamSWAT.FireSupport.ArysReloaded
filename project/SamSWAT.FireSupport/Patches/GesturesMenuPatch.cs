@@ -44,9 +44,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Patches
             var player = gameWorld.RegisteredPlayers[0];
             if (!(player is LocalPlayer)) return false;
 
-            const string rangefinderTpl = "61605e13ffa6e502ac5e7eef";
             var inventory = player.Profile.Inventory;
-            var hasRangefinder = inventory.AllRealPlayerItems.Any(x => x.TemplateId == rangefinderTpl);
+            var hasRangefinder = inventory.AllRealPlayerItems.Any(x => x.TemplateId == ItemConstants.RANGEFINDER_TPL);
             
             return hasRangefinder;
         }
