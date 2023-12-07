@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Comfort.Common;
+using EFT;
+using System.Collections;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
@@ -35,7 +37,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         
         private void CrossFadeAudio()
         {
-            float distance = Vector3.Distance(Camera.current.transform.position, rotorsCloseSource.transform.position);
+            var player = Singleton<GameWorld>.Instance.MainPlayer;
+            float distance = Vector3.Distance(player.CameraPosition.position, rotorsCloseSource.transform.position);
             float volume = volumeCurve.Evaluate(distance);
 
             rotorsCloseSource.volume = volume;

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Comfort.Common;
+using EFT;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -36,6 +37,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private IEnumerator FlySequence(Vector3 strafePos)
         {
             var betterAudio = Singleton<BetterAudio>.Instance;
+            var player = Singleton<GameWorld>.Instance.MainPlayer;
             _flareCountermeasureInstance.SetActive(false);
             yield return new WaitForSecondsRealtime(3);
             gau8Particles.SetActive(true);
@@ -46,7 +48,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             betterAudio.PlayAtPoint(
                 strafePos, 
                 GetRandomClip(gau8ExpSounds), 
-                Vector3.Distance(Camera.current.transform.position, strafePos), 
+                Vector3.Distance(player.CameraPosition.position, strafePos), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 1200, 
                 1, 
@@ -57,7 +59,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             betterAudio.PlayAtPoint(
                 gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, 
                 GetRandomClip(gau8Sound), 
-                Vector3.Distance(Camera.current.transform.position, gau8Transform.position), 
+                Vector3.Distance(player.CameraPosition.position, gau8Transform.position), 
                 BetterAudio.AudioSourceGroupType.Gunshots, 
                 3200, 
                 2);

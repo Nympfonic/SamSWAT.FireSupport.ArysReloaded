@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
@@ -59,7 +60,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     yield break;
                 }
 
-                var cameraT = Camera.current.transform;
+                var cameraT = Singleton<GameWorld>.Instance.MainPlayer.CameraPosition;
                 Physics.Raycast(cameraT.position + cameraT.forward, cameraT.forward, out var hitInfo, 500,
                     LayerMask.GetMask("Terrain", "LowPolyCollider"));
                 FireSupportUI.Instance.SpotterNotice.SetActive(hitInfo.point == Vector3.zero);
@@ -110,7 +111,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     _requestCanceled = true;
                     yield break;
                 }
-                //float rotSpeed = 4f;
                 float xAxisRotation = Input.GetAxis("Mouse X") * 5;
                 spotterHorizontal.transform.Rotate(Vector3.down, xAxisRotation);
                 yield return null;
