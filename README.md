@@ -1,5 +1,10 @@
 # Disclaimer
 
+[![CC BY-NC 4.0][cc-by-shield]][cc-by]
+
+[cc-by]: https://creativecommons.org/licenses/by-nc/4.0/
+[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
+
 This mod was originally made by <a href="https://github.com/SamSWAT911">SamSWAT911</a>.
 
 In their absence, I have decided to update the beloved FireSupport mod for 3.7.4; it will likely work with 3.7.1 to 3.7.4, but I have not tested the others besides 3.7.4.
