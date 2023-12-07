@@ -20,6 +20,9 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var uh60 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/uh60_blackhawk.bundle")).GetComponent<UH60Behaviour>();
             var poolTransform = new GameObject("FireSupportPool").transform;
 
+            if (A10Behaviours.Count > 0) A10Behaviours.Clear();
+            if (UH60Behaviours.Count > 0) UH60Behaviours.Clear();
+
             for (int i = 0; i < 10; i++)
             {
                 A10Behaviours.Add(LoadA10(a10, poolTransform));

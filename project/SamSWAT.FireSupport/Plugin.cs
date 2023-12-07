@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace SamSWAT.FireSupport.ArysReloaded
 {
-    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.0")]
+    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.1")]
     public class Plugin : BaseUnityPlugin
     {
         public static string Directory;
