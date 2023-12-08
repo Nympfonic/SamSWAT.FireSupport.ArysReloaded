@@ -37,7 +37,9 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         
         private void CrossFadeAudio()
         {
-            var player = Singleton<GameWorld>.Instance.MainPlayer;
+            var player = Singleton<GameWorld>.Instance?.MainPlayer;
+            if (player == null) return;
+
             float distance = Vector3.Distance(player.CameraPosition.position, rotorsCloseSource.transform.position);
             float volume = volumeCurve.Evaluate(distance);
 
