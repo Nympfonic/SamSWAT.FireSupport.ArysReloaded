@@ -78,8 +78,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             AvailableStrafeRequests--;
             _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));
             _audio.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
-            yield return new WaitForSecondsRealtime(8f);
-            _audio.PlayVoiceover(EVoiceoverType.JetArriving);
             yield return new WaitForSecondsRealtime(4f);
             a10.ProcessRequest(pos, dir, Vector3.zero);
         }
@@ -89,10 +87,10 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var uh60 = FireSupportPool.TakeFromPool(ESupportType.Extract);
             AvailableExtractRequests--;
             _requestAvailable = false;
-            FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationExtractionRequest);
+            _audio.PlayVoiceover(EVoiceoverType.StationExtractionRequest);
             yield return new WaitForSecondsRealtime(8f);
             uh60.ProcessRequest(position, Vector3.zero, rotation);
-            FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliArrivingToPickup);
+            _audio.PlayVoiceover(EVoiceoverType.SupportHeliArrivingToPickup);
             yield return new WaitForSecondsRealtime(35f + Plugin.HelicopterWaitTime.Value);
             if (Instance == null) yield break;
             _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));

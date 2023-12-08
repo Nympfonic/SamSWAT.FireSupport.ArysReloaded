@@ -56,9 +56,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                 case ESupportType.Strafe:
                     var a10 = A10Behaviours.Find(x => x.gameObject.activeSelf == false);
                     a10.gameObject.SetActive(true);
-                    a10.engineSource.clip = a10.engineSounds[Random.Range(0, a10.engineSounds.Length)];
-                    a10.engineSource.outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
-                    a10.engineSource.Play();
                     return a10;
                 case ESupportType.Extract:
                     var uh60 = UH60Behaviours.Find(x => x.gameObject.activeSelf == false);
