@@ -78,7 +78,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             AvailableStrafeRequests--;
             _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));
             _audio.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
-            yield return new WaitForSecondsRealtime(4f);
+            yield return new WaitForSecondsRealtime(8f);
+            _audio.PlayVoiceover(EVoiceoverType.JetArriving);
             a10.ProcessRequest(pos, dir, Vector3.zero);
         }
         

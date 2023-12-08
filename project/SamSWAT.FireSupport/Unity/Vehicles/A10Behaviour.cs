@@ -20,13 +20,10 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
         public void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation)
         {
-            Vector3 a10StartPos = position + direction * 3200 + 320 * Vector3.up;
+            Vector3 a10StartPos = position + direction * 2650 + 320 * Vector3.up;
             Vector3 a10Heading = position - a10StartPos;
             float a10YAngle = Mathf.Atan2(a10Heading.x, a10Heading.z) * Mathf.Rad2Deg;
             transform.SetPositionAndRotation(a10StartPos, Quaternion.Euler(0, a10YAngle, 0));
-            engineSource.clip = engineSounds[Random.Range(0, engineSounds.Length)];
-            engineSource.outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
-            engineSource.Play();
             _flareCountermeasureInstance = Instantiate(flareCountermeasure, null);
             StartCoroutine(FlySequence(position));
         }
@@ -43,9 +40,11 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var fireSupportAudio = FireSupportAudio.Instance;
             var player = Singleton<GameWorld>.Instance.MainPlayer;
 
-            yield return new WaitForSecondsRealtime(4f);
-            fireSupportAudio.PlayVoiceover(EVoiceoverType.JetArriving);
-            yield return new WaitForSecondsRealtime(4f);
+            yield return new WaitForSecondsRealtime(3f);
+            engineSource.clip = engineSounds[Random.Range(0, engineSounds.Length)];
+            engineSource.outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
+            engineSource.Play();
+            yield return new WaitForSecondsRealtime(1f);
             _flareCountermeasureInstance.SetActive(false);
             yield return new WaitForSecondsRealtime(3f);
             gau8Particles.SetActive(true);
