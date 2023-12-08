@@ -119,8 +119,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             }
 
             _inputManager.SetActive(true);
-            _strafeStartPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (1)").position;
-            _strafeEndPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (6)").position;
+            _strafeStartPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (6)").position;
+            _strafeEndPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (1)").position;
             Destroy(spotterHorizontal);
         }
 
