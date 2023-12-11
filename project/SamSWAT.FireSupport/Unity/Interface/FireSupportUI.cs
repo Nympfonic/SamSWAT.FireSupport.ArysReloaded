@@ -13,7 +13,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
     public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        private const string RANGEFINDER_TPL = "61605e13ffa6e502ac5e7eef";
         public GameObject SpotterNotice;
         public GameObject SpotterHeliNotice;
         public Text timerText;
@@ -57,7 +56,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             var enabledColor = new Color(1, 1, 1, 1);
             var disabledColor = new Color(1, 1, 1, 0.4f);
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == RANGEFINDER_TPL;
+            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
 
             tooltip.SetUnlockStatus(rangefinderInHands);
             
@@ -98,7 +97,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private void HandleInput()
         {
             if (!IsUnderPointer) return;
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == RANGEFINDER_TPL;
+            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
             if (!rangefinderInHands) return;
             float angle = CalculateAngle();
 
