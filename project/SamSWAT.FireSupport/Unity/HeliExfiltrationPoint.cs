@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Linq;
-using System.Reflection;
-using Comfort.Common;
+﻿using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.UI;
+using System.Collections;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
@@ -26,7 +26,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(other);
             if (player == null || !player.IsYourPlayer) return;
-            
+
             _timer = Plugin.HelicopterExtractTime.Value;
             Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Show(_timer);
             _coroutine = StartCoroutine(Timer(player.ProfileId));
@@ -52,7 +52,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(other);
             if (player == null || !player.IsYourPlayer) return;
-            
+
             _timer = Plugin.HelicopterExtractTime.Value;
             Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Close();
 

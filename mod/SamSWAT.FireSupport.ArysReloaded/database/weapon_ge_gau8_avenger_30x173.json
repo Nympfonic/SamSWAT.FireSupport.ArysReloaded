@@ -1,5 +1,5 @@
 {
-    "_id": "weapon_ge_gau8_avenger_30x173",
+    "_id": "660b2d05cec10101410e7d7b",
     "_name": "weapon_ge_gau8_avenger_30x173",
     "_parent": "5447bed64bdc2d97278b4568",
     "_props": {
@@ -29,12 +29,12 @@
                 "_id": "5d52cc5ba4b9367408500064",
                 "_mergeSlotWithChildren": false,
                 "_name": "patron_in_weapon",
-                "_parent": "weapon_ge_gau8_avenger_30x173",
+                "_parent": "660b2d05cec10101410e7d7b",
                 "_props": {
                     "filters": [
                         {
                             "Filter": [
-                                "ammo_30x173_gau8_avenger"
+                                "660b2d05cec10101410e7d7a"
                             ]
                         }
                     ]

@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -53,21 +53,21 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             StartCoroutine(Gau8Sequence(strafePos));
             yield return new WaitForSecondsRealtime(2f);
             betterAudio.PlayAtPoint(
-                strafePos, 
-                GetRandomClip(gau8ExpSounds), 
-                Vector3.Distance(player.CameraPosition.position, strafePos), 
-                BetterAudio.AudioSourceGroupType.Gunshots, 
-                1200, 
-                1, 
+                strafePos,
+                GetRandomClip(gau8ExpSounds),
+                Vector3.Distance(player.CameraPosition.position, strafePos),
+                BetterAudio.AudioSourceGroupType.Gunshots,
+                1200,
+                1,
                 EOcclusionTest.Regular);
             gau8Particles.SetActive(false);
             yield return new WaitForSecondsRealtime(3.5f);
             betterAudio.PlayAtPoint(
-                gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100, 
-                GetRandomClip(gau8Sound), 
-                Vector3.Distance(player.CameraPosition.position, gau8Transform.position), 
-                BetterAudio.AudioSourceGroupType.Gunshots, 
-                3200, 
+                gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100,
+                GetRandomClip(gau8Sound),
+                Vector3.Distance(player.CameraPosition.position, gau8Transform.position),
+                BetterAudio.AudioSourceGroupType.Gunshots,
+                3200,
                 2);
             yield return new WaitForSecondsRealtime(1.5f);
             _flareCountermeasureInstance.SetActive(true);
@@ -84,7 +84,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             Vector3 gau8Pos = gau8Transform.position + gau8Transform.forward * 515;
             Vector3 gau8Dir = Vector3.Normalize(strafePos - gau8Pos);
             Vector3 gau8LeftDir = Vector3.Cross(gau8Dir, Vector3.up).normalized;
-            var projectile = WeaponClass.GetAmmo("ammo_30x173_gau8_avenger");
+            var projectile = WeaponClass.GetAmmo(ItemConstants.GAU8_AMMO_ID);
             int counter = 50;
             while (counter > 0)
             {

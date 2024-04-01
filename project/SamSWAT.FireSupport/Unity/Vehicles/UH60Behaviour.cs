@@ -34,7 +34,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             CrossFadeAudio();
         }
-        
+
         private void CrossFadeAudio()
         {
             var player = Singleton<GameWorld>.Instance?.MainPlayer;
@@ -48,7 +48,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             rotorsDistantSource.volume = 1 - volume;
             engineDistantSource.volume = 1 - volume;
         }
-        
+
         private IEnumerator OnHelicopterArrive()
         {
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliPickingUp);

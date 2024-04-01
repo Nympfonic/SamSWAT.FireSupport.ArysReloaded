@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Threading.Tasks;
-using EFT;
+﻿using EFT;
 using EFT.InputSystem;
 using EFT.UI;
 using EFT.UI.Gestures;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
@@ -17,7 +17,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private FireSupportUI _ui;
         private FireSupportSpotter _spotter;
         private GesturesMenu _gesturesMenu;
-        
+
         public static FireSupportController Instance { get; private set; }
         public bool StrafeRequestAvailable => _requestAvailable && AvailableStrafeRequests > 0;
         public bool ExtractRequestAvailable => _requestAvailable && AvailableExtractRequests > 0;
@@ -69,7 +69,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     break;
             }
         }
-        
+
         private IEnumerator StrafeRequest(Vector3 strafeStartPos, Vector3 strafeEndPos)
         {
             var a10 = FireSupportPool.TakeFromPool(ESupportType.Strafe);
@@ -82,7 +82,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             _audio.PlayVoiceover(EVoiceoverType.JetArriving);
             a10.ProcessRequest(pos, dir, Vector3.zero);
         }
-        
+
         private IEnumerator ExtractionRequest(Vector3 position, Vector3 rotation)
         {
             var uh60 = FireSupportPool.TakeFromPool(ESupportType.Extract);
@@ -96,7 +96,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             if (Instance == null) yield break;
             _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));
         }
-        
+
         private IEnumerator Timer(float time)
         {
             _requestAvailable = false;
@@ -122,7 +122,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             }
         }
 
-        protected override ETranslateResult TranslateCommand(ECommand command)
+        public override ETranslateResult TranslateCommand(ECommand command)
         {
             if (command == ECommand.MumbleToggle)
             {
@@ -132,11 +132,11 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             return ETranslateResult.Ignore;
         }
 
-        protected override void TranslateAxes(ref float[] axes)
+        public override void TranslateAxes(ref float[] axes)
         {
         }
 
-        protected override ECursorResult ShouldLockCursor()
+        public override ECursorResult ShouldLockCursor()
         {
             return ECursorResult.Ignore;
         }

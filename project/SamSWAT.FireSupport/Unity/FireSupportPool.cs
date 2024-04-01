@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Comfort.Common;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Comfort.Common;
-using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
@@ -13,7 +12,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
     {
         private static List<A10Behaviour> A10Behaviours = new List<A10Behaviour>();
         private static List<UH60Behaviour> UH60Behaviours = new List<UH60Behaviour>();
-        
+
         public static async Task LoadBundlesAndCreatePools()
         {
             var a10 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/a10_warthog.bundle")).GetComponent<A10Behaviour>();

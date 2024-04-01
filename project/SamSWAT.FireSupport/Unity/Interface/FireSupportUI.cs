@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
 using EFT.UI.Gestures;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -22,7 +22,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private Player _player;
         private ESupportType _selectedSupportOption;
         private float _menuOffset;
-        
+
         public static FireSupportUI Instance { get; private set; }
         public bool IsUnderPointer { get; set; }
         public event Action<ESupportType> SupportRequested;
@@ -37,12 +37,12 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             fireSupportUiT.localPosition = new Vector3(0, -255, 0);
             fireSupportUiT.localScale = new Vector3(1.4f, 1.4f, 1);
             Instance._menuOffset = Screen.height / 2f - fireSupportUiT.position.y;
-            
+
             var infoPanelTransform = Instance.SpotterNotice.transform.parent;
             infoPanelTransform.parent = Singleton<GameUI>.Instance.transform;
             infoPanelTransform.localPosition = new Vector3(0, -370f, 0);
             infoPanelTransform.localScale = Vector3.one;
-            
+
             return Instance;
         }
 
@@ -60,7 +60,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var rangefinderInHands = _player.HandsController.Item.TemplateId == RANGEFINDER_TPL;
 
             tooltip.SetUnlockStatus(rangefinderInHands);
-            
+
             if (!rangefinderInHands)
             {
                 return;

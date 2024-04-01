@@ -1,8 +1,9 @@
-﻿using System;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
+using SamSWAT.FireSupport.ArysReloaded.Unity;
+using System;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Utils
@@ -28,15 +29,15 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
             Shoot = AccessToolsUtil.MethodDelegate<Action<BallisticsCalculator, object>>(shootMethod, false);
             CreateShot = AccessToolsUtil.MethodDelegate<CreateShotDelegate>(createShotMethod);
         }
-        
+
         public static void Init()
         {
             var gameWorld = Singleton<GameWorld>.Instance;
             _calc = gameWorld._sharedBallisticsCalculator;
             _player = gameWorld.MainPlayer.ProfileId;
-            
+
             var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
-            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, "weapon_ge_gau8_avenger_30x173");
+            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, ItemConstants.GAU8_WEAPON_ID);
         }
 
         public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction)
@@ -44,7 +45,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
             var projectile = CreateShot(_calc, ammo, origin, direction, 0, _player, _gau8Weapon);
             Shoot(_calc, projectile);
         }
-        
+
         public static object GetAmmo(string tid)
         {
             var id = Guid.NewGuid().ToString("N").Substring(0, 24);

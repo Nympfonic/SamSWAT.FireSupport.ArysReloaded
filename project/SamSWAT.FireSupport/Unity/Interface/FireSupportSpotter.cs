@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Threading.Tasks;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
@@ -127,7 +127,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private IEnumerator SpotterConfirmation()
         {
             if (_requestCanceled) yield break;
-            
+
             var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.8f);
             Destroy(spotterConfirmation);

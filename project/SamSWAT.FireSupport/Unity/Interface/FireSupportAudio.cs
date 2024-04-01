@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Comfort.Common;
+﻿using Comfort.Common;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
@@ -23,7 +23,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         [SerializeField] private AudioClip[] supportHeliLeaving;
         [SerializeField] private AudioClip[] supportHeliLeavingAfterPickup;
         [SerializeField] private AudioClip[] supportHeliLeavingNoPickup;
-        
+
         public static FireSupportAudio Instance { get; private set; }
 
         public static async Task<FireSupportAudio> Load()
@@ -92,7 +92,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             }
 
             if (voAudioClip == null) return;
-            
+
             var sourceGroup = BetterAudio.AudioSourceGroupType.Nonspatial;
             var volume = Plugin.VoiceoverVolume.Value / 100f;
             Singleton<BetterAudio>.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
