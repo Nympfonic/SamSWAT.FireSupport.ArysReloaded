@@ -23,7 +23,11 @@ namespace SamSWAT.FireSupport.ArysReloaded.Patches
         [PatchPostfix]
         public static async void PatchPostfix(GesturesMenu __instance)
         {
-            if (!IsFireSupportAvailable()) return;
+            if (!IsFireSupportAvailable())
+            {
+                return;
+            }
+
             var owner = Singleton<GameWorld>.Instance.MainPlayer.GetComponent<GamePlayerOwner>();
             var fireSupportController = await FireSupportController.Init(__instance);
             Traverse.Create(owner).Field<List<InputNode>>("_children").Value.Add(fireSupportController);
@@ -34,15 +38,24 @@ namespace SamSWAT.FireSupport.ArysReloaded.Patches
         private static bool IsFireSupportAvailable()
         {
             var gameWorld = Singleton<GameWorld>.Instance;
-            var locationIsSuitable = LocationScene.GetAll<AirdropPoint>().Any();
+            if (gameWorld == null)
+            {
+                return false;
+            }
 
-            if (!Plugin.Enabled.Value || gameWorld == null || FireSupportController.Instance != null || !locationIsSuitable)
+            var locationIsSuitable = gameWorld.MainPlayer.Location.ToLower() == "sandbox" 
+                || LocationScene.GetAll<AirdropPoint>().Any();
+
+            if (!Plugin.Enabled.Value || FireSupportController.Instance != null || !locationIsSuitable)
             {
                 return false;
             }
 
             var player = gameWorld.RegisteredPlayers[0];
-            if (!(player is LocalPlayer)) return false;
+            if (!(player is LocalPlayer))
+            {
+                return false;
+            }
 
             var inventory = player.Profile.Inventory;
             var hasRangefinder = inventory.AllRealPlayerItems.Any(x => x.TemplateId == ItemConstants.RANGEFINDER_TPL);
