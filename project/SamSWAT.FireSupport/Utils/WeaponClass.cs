@@ -37,7 +37,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
             _player = gameWorld.MainPlayer.ProfileId;
 
             var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
-            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, ItemConstants.GAU8_WEAPON_ID);
+            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, ItemConstants.GAU8_WEAPON_TPL);
         }
 
         public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction)

@@ -84,7 +84,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             Vector3 gau8Pos = gau8Transform.position + gau8Transform.forward * 515;
             Vector3 gau8Dir = Vector3.Normalize(strafePos - gau8Pos);
             Vector3 gau8LeftDir = Vector3.Cross(gau8Dir, Vector3.up).normalized;
-            var projectile = WeaponClass.GetAmmo(ItemConstants.GAU8_AMMO_ID);
+            var projectile = WeaponClass.GetAmmo(ItemConstants.GAU8_AMMO_TPL);
             int counter = 50;
             while (counter > 0)
             {

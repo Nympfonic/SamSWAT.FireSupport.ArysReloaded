@@ -26,11 +26,11 @@ namespace SamSWAT.FireSupport.ArysReloaded.Database
 
             var json = File.ReadAllText($"{Plugin.Directory}/database/ammo_30x173_gau8_avenger.json");
             var gau8Ammo = JsonConvert.DeserializeObject<AmmoTemplate>(json, converters);
-            __instance.Add(ItemConstants.GAU8_AMMO_ID, gau8Ammo);
+            __instance.Add(ItemConstants.GAU8_AMMO_TPL, gau8Ammo);
 
             json = File.ReadAllText($"{Plugin.Directory}/database/weapon_ge_gau8_avenger_30x173.json");
             var gau8Weapon = JsonConvert.DeserializeObject<WeaponTemplate>(json, converters);
-            __instance.Add(ItemConstants.GAU8_WEAPON_ID, gau8Weapon);
+            __instance.Add(ItemConstants.GAU8_WEAPON_TPL, gau8Weapon);
         }
     }
 }
