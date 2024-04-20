@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SamSWAT.FireSupport.ArysReloaded</RootNamespace>
     <AssemblyName>SamSWAT.FireSupport.ArysReloaded</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -51,8 +54,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>References\Comfort.dll</HintPath>
     </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>References\DissonanceVoip.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\References\Newtonsoft.Json.dll</HintPath>
+      <HintPath>References\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -101,30 +107,72 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database\AddLocaleToDatabasePatch.cs" />
-    <Compile Include="Database\AddItemToDatabasePatch.cs" />
-    <Compile Include="Patches\GesturesMenuPatch.cs" />
+    <Compile Include="Utils\IBatchFixedUpdate.cs" />
+    <Compile Include="Utils\IBatchUpdate.cs" />
+    <Compile Include="Patches\AddLocaleToDatabasePatch.cs" />
+    <Compile Include="Patches\AddItemToDatabasePatch.cs" />
+    <Compile Include="Patches\BotKilledPatch.cs" />
+    <Compile Include="Patches\GesturesMenuInitPatch.cs" />
+    <Compile Include="Patches\GesturesMenuShowPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Unity\Vehicles\ITurret.cs" />
+    <Compile Include="Unity\Vehicles\IWeapon.cs" />
+    <Compile Include="Utils\UpdateManager.cs" />
+    <Compile Include="Utils\Axes.cs" />
+    <Compile Include="Unity\Vehicles\WeaponType.cs" />
+    <Compile Include="Unity\FireSupport.cs" />
+    <Compile Include="Unity\Vehicles\IController.cs" />
+    <Compile Include="Unity\Vehicles\VehicleBehaviour.cs" />
+    <Compile Include="Unity\Vehicles\A10\A10FireSupport.cs" />
     <Compile Include="Unity\ColliderReporter.cs" />
-    <Compile Include="Unity\ESupportType.cs" />
-    <Compile Include="Unity\EVoiceoverType.cs" />
+    <Compile Include="Unity\SupportType.cs" />
+    <Compile Include="Unity\VoiceoverType.cs" />
+    <Compile Include="Unity\IFireSupport.cs" />
     <Compile Include="Unity\FireSupportController.cs" />
-    <Compile Include="Unity\FireSupportPool.cs" />
     <Compile Include="Unity\HeliExfiltrationPoint.cs" />
-    <Compile Include="Unity\IFireSupportOption.cs" />
     <Compile Include="Unity\Interface\FireSupportAudio.cs" />
     <Compile Include="Unity\Interface\FireSupportSpotter.cs" />
     <Compile Include="Unity\Interface\FireSupportUI.cs" />
     <Compile Include="Unity\Interface\FireSupportUIElement.cs" />
-    <Compile Include="Unity\ItemConstants.cs" />
+    <Compile Include="Utils\BehaviourTree\Tasks\TaskAcquireTarget.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64Task_CheckArrivedAtLocation.cs" />
+    <Compile Include="Utils\BehaviourTree\Tasks\TaskCheckTargets.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64Task_FireHydraPods.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64Task_BeginMoveToPosition.cs" />
+    <Compile Include="Unity\Vehicles\ThrottleState.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64WeaponSoundType.cs" />
+    <Compile Include="Utils\BehaviourTree\Tasks\TaskShootWeapon.cs" />
+    <Compile Include="Utils\BehaviourTree\Tasks\TaskWait.cs" />
+    <Compile Include="Utils\BrownianMotion.cs" />
     <Compile Include="Unity\SimpleSpinBlur.cs" />
-    <Compile Include="Unity\Vehicles\A10Behaviour.cs" />
-    <Compile Include="Unity\Vehicles\UH60Behaviour.cs" />
-    <Compile Include="Utils\AccessToolsUtil.cs" />
-    <Compile Include="Utils\ItemFactoryUtil.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64Audio.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64AudioController.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64Behaviour.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64BehaviourTree.cs" />
+    <Compile Include="Unity\Vehicles\AH64\AH64FireSupport.cs" />
+    <Compile Include="Utils\BehaviourTree\Tasks\TaskMoveToDestination.cs" />
+    <Compile Include="Unity\Vehicles\UH60\UH60FireSupport.cs" />
+    <Compile Include="Unity\Vehicles\A10\A10Behaviour.cs" />
+    <Compile Include="Unity\Vehicles\UH60\UH60Behaviour.cs" />
+    <Compile Include="Utils\BehaviourTree\Node.cs" />
+    <Compile Include="Utils\BehaviourTree\Selector.cs" />
+    <Compile Include="Utils\BehaviourTree\Sequence.cs" />
+    <Compile Include="Utils\BehaviourTree\Tree.cs" />
     <Compile Include="Utils\AssetLoader.cs" />
+    <Compile Include="Utils\Perlin.cs" />
+    <Compile Include="Utils\PID\PIDController.cs" />
+    <Compile Include="Utils\PID\PIDSettings.cs" />
+    <Compile Include="Utils\ModHelper.cs" />
+    <Compile Include="Utils\ReflectionHelper.cs" />
+    <Compile Include="Utils\VHACD\ComplexCollider.cs" />
+    <Compile Include="Utils\VHACD\ComplexColliderData.cs" />
+    <Compile Include="Utils\VHACD\Parameters.cs" />
     <Compile Include="Utils\WeaponClass.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

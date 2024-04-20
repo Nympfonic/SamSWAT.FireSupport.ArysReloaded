@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using Comfort.Common;
+﻿using SamSWAT.FireSupport.ArysReloaded.Unity.Vehicles;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Threading.Tasks;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.ArysReloaded.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity.Interface
 {
     public class FireSupportAudio : ScriptableObject
     {
@@ -13,17 +13,26 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         [SerializeField] private AudioClip[] stationStrafeRequest;
         [SerializeField] private AudioClip[] stationStrafeEnd;
         [SerializeField] private AudioClip[] stationExtractionRequest;
+        [SerializeField] private AudioClip[] stationApacheRequest;
+        [SerializeField] private AudioClip[] stationApacheEnd;
         [SerializeField] private AudioClip[] jetArriving;
         [SerializeField] private AudioClip[] jetFiring;
         [SerializeField] private AudioClip[] jetLeaving;
-        [SerializeField] private AudioClip[] supportHeliArriving;
         [SerializeField] private AudioClip[] supportHeliArrivingToPickup;
         [SerializeField] private AudioClip[] supportHeliPickingUp;
         [SerializeField] private AudioClip[] supportHeliHurry;
-        [SerializeField] private AudioClip[] supportHeliLeaving;
         [SerializeField] private AudioClip[] supportHeliLeavingAfterPickup;
         [SerializeField] private AudioClip[] supportHeliLeavingNoPickup;
-        
+        [SerializeField] private AudioClip[] apacheArriving;
+        [SerializeField] private AudioClip[] apacheFiringM230;
+        [SerializeField] private AudioClip[] apacheFiringRockets;
+        [SerializeField] private AudioClip[] apacheConfirmKills;
+        [SerializeField] private AudioClip[] apachePause;
+        [SerializeField] private AudioClip[] apacheLeaving;
+        [SerializeField] private AudioClip[] apacheTakingFire;
+        [SerializeField] private AudioClip[] apacheReceivingDamage;
+        [SerializeField] private AudioClip[] apacheCrashing;
+
         public static FireSupportAudio Instance { get; private set; }
 
         public static async Task<FireSupportAudio> Load()
@@ -32,70 +41,96 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             return Instance;
         }
 
-        public void PlayVoiceover(EVoiceoverType voiceoverType)
+        public void PlayVoiceover(VoiceoverType voiceoverType)
         {
             AudioClip voAudioClip;
 
             switch (voiceoverType)
             {
-                case EVoiceoverType.StationReminder:
-                    voAudioClip = stationReminder[Random.Range(0, stationReminder.Length)];
+                case VoiceoverType.StationReminder:
+                    voAudioClip = ModHelper.GetRandomClip(stationReminder);
                     break;
-                case EVoiceoverType.StationAvailable:
-                    voAudioClip = stationAvailable[Random.Range(0, stationAvailable.Length)];
+                case VoiceoverType.StationAvailable:
+                    voAudioClip = ModHelper.GetRandomClip(stationAvailable);
                     break;
-                case EVoiceoverType.StationDoesNotHear:
-                    voAudioClip = stationDoesNotHear[Random.Range(0, stationDoesNotHear.Length)];
+                case VoiceoverType.StationDoesNotHear:
+                    voAudioClip = ModHelper.GetRandomClip(stationDoesNotHear);
                     break;
-                case EVoiceoverType.StationStrafeRequest:
-                    voAudioClip = stationStrafeRequest[Random.Range(0, stationStrafeRequest.Length)];
+                case VoiceoverType.StationStrafeRequest:
+                    voAudioClip = ModHelper.GetRandomClip(stationStrafeRequest);
                     break;
-                case EVoiceoverType.StationStrafeEnd:
-                    voAudioClip = stationStrafeEnd[Random.Range(0, stationStrafeEnd.Length)];
+                case VoiceoverType.StationStrafeEnd:
+                    voAudioClip = ModHelper.GetRandomClip(stationStrafeEnd);
                     break;
-                case EVoiceoverType.StationExtractionRequest:
-                    voAudioClip = stationExtractionRequest[Random.Range(0, stationExtractionRequest.Length)];
+                case VoiceoverType.StationExtractionRequest:
+                    voAudioClip = ModHelper.GetRandomClip(stationExtractionRequest);
                     break;
-                case EVoiceoverType.JetArriving:
-                    voAudioClip = jetArriving[Random.Range(0, jetArriving.Length)];
+                case VoiceoverType.StationApacheRequest:
+                    voAudioClip = ModHelper.GetRandomClip(stationApacheRequest);
                     break;
-                case EVoiceoverType.JetFiring:
-                    voAudioClip = jetFiring[Random.Range(0, jetFiring.Length)];
+                case VoiceoverType.StationApacheEnd:
+                    voAudioClip = ModHelper.GetRandomClip(stationApacheEnd);
                     break;
-                case EVoiceoverType.JetLeaving:
-                    voAudioClip = jetLeaving[Random.Range(0, jetLeaving.Length)];
+                case VoiceoverType.JetArriving:
+                    voAudioClip = ModHelper.GetRandomClip(jetArriving);
                     break;
-                case EVoiceoverType.SupportHeliArriving:
-                    voAudioClip = supportHeliArriving[Random.Range(0, supportHeliArriving.Length)];
+                case VoiceoverType.JetFiring:
+                    voAudioClip = ModHelper.GetRandomClip(jetFiring);
                     break;
-                case EVoiceoverType.SupportHeliArrivingToPickup:
-                    voAudioClip = supportHeliArrivingToPickup[Random.Range(0, supportHeliArrivingToPickup.Length)];
+                case VoiceoverType.JetLeaving:
+                    voAudioClip = ModHelper.GetRandomClip(jetLeaving);
                     break;
-                case EVoiceoverType.SupportHeliPickingUp:
-                    voAudioClip = supportHeliPickingUp[Random.Range(0, supportHeliPickingUp.Length)];
+                case VoiceoverType.SupportHeliArrivingToPickup:
+                    voAudioClip = ModHelper.GetRandomClip(supportHeliArrivingToPickup);
                     break;
-                case EVoiceoverType.SupportHeliHurry:
-                    voAudioClip = supportHeliHurry[Random.Range(0, supportHeliHurry.Length)];
+                case VoiceoverType.SupportHeliPickingUp:
+                    voAudioClip = ModHelper.GetRandomClip(supportHeliPickingUp);
                     break;
-                case EVoiceoverType.SupportHeliLeaving:
-                    voAudioClip = supportHeliLeaving[Random.Range(0, supportHeliLeaving.Length)];
+                case VoiceoverType.SupportHeliHurry:
+                    voAudioClip = ModHelper.GetRandomClip(supportHeliHurry);
                     break;
-                case EVoiceoverType.SupportHeliLeavingAfterPickup:
-                    voAudioClip = supportHeliLeavingAfterPickup[Random.Range(0, supportHeliLeavingAfterPickup.Length)];
+                case VoiceoverType.SupportHeliLeavingAfterPickup:
+                    voAudioClip = ModHelper.GetRandomClip(supportHeliLeavingAfterPickup);
                     break;
-                case EVoiceoverType.SupportHeliLeavingNoPickup:
-                    voAudioClip = supportHeliLeavingNoPickup[Random.Range(0, supportHeliLeavingNoPickup.Length)];
+                case VoiceoverType.SupportHeliLeavingNoPickup:
+                    voAudioClip = ModHelper.GetRandomClip(supportHeliLeavingNoPickup);
+                    break;
+                case VoiceoverType.ApacheArriving:
+                    voAudioClip = ModHelper.GetRandomClip(apacheArriving);
+                    break;
+                case VoiceoverType.ApacheFiringM230:
+                    voAudioClip = ModHelper.GetRandomClip(apacheFiringM230);
+                    break;
+                case VoiceoverType.ApacheFiringRockets:
+                    voAudioClip = ModHelper.GetRandomClip(apacheFiringRockets);
+                    break;
+                case VoiceoverType.ApacheConfirmKills:
+                    voAudioClip = ModHelper.GetRandomClip(apacheConfirmKills);
+                    break;
+                case VoiceoverType.ApachePause:
+                    voAudioClip = ModHelper.GetRandomClip(apachePause);
+                    break;
+                case VoiceoverType.ApacheLeaving:
+                    voAudioClip = ModHelper.GetRandomClip(apacheLeaving);
+                    break;
+                case VoiceoverType.ApacheTakingFire:
+                    voAudioClip = ModHelper.GetRandomClip(apacheTakingFire);
+                    break;
+                case VoiceoverType.ApacheReceivingDamage:
+                    voAudioClip = ModHelper.GetRandomClip(apacheReceivingDamage);
+                    break;
+                case VoiceoverType.ApacheCrashing:
+                    voAudioClip = ModHelper.GetRandomClip(apacheCrashing);
                     break;
                 default:
-                    voAudioClip = null;
-                    break;
+                    return;
             }
 
             if (voAudioClip == null) return;
-            
+
             var sourceGroup = BetterAudio.AudioSourceGroupType.Nonspatial;
             var volume = Plugin.VoiceoverVolume.Value / 100f;
-            Singleton<BetterAudio>.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
+            ModHelper.            BetterAudio?.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
         }
     }
 }

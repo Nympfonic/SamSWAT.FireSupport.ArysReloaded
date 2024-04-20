@@ -1,6 +1,6 @@
-﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity
+﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity.Vehicles
 {
-    public enum EVoiceoverType
+    public enum VoiceoverType
     {
         StationReminder,
         StationAvailable,
@@ -8,6 +8,8 @@
         StationStrafeRequest,
         StationStrafeEnd,
         StationExtractionRequest,
+        StationApacheRequest,
+        StationApacheEnd,
         JetArriving,
         JetFiring,
         JetLeaving,
@@ -17,6 +19,15 @@
         SupportHeliHurry,
         SupportHeliLeaving,
         SupportHeliLeavingAfterPickup,
-        SupportHeliLeavingNoPickup
+        SupportHeliLeavingNoPickup,
+        ApacheArriving,
+        ApacheFiringM230,
+        ApacheFiringRockets,
+        ApacheConfirmKills,
+        ApachePause,
+        ApacheLeaving,
+        ApacheTakingFire,
+        ApacheReceivingDamage,
+        ApacheCrashing
     }
 }

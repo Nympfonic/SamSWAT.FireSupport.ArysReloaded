@@ -1,112 +1,128 @@
-﻿using System;
-using System.Threading.Tasks;
-using Comfort.Common;
-using EFT;
+﻿using Comfort.Common;
 using EFT.UI;
 using EFT.UI.Gestures;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace SamSWAT.FireSupport.ArysReloaded.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity.Interface
 {
-    public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBatchUpdate
     {
         public GameObject SpotterNotice;
         public GameObject SpotterHeliNotice;
         public Text timerText;
         [SerializeField] private FireSupportUIElement[] supportOptions;
         [SerializeField] private HoverTooltipArea tooltip;
-        private Player _player;
-        private ESupportType _selectedSupportOption;
+        private SupportType _selectedSupportOption;
         private float _menuOffset;
-        
+
+        public event Action<SupportType> SupportRequested;
+
         public static FireSupportUI Instance { get; private set; }
         public bool IsUnderPointer { get; set; }
-        public event Action<ESupportType> SupportRequested;
 
         public static async Task<FireSupportUI> Load(GesturesMenu gesturesMenu)
         {
             Instance = Instantiate(await AssetLoader.LoadAssetAsync("assets/content/ui/firesupport_ui.bundle")).GetComponent<FireSupportUI>();
-            Instance._player = Singleton<GameWorld>.Instance.MainPlayer;
 
             var fireSupportUiT = Instance.transform;
             fireSupportUiT.parent = gesturesMenu.transform;
             fireSupportUiT.localPosition = new Vector3(0, -255, 0);
             fireSupportUiT.localScale = new Vector3(1.4f, 1.4f, 1);
             Instance._menuOffset = Screen.height / 2f - fireSupportUiT.position.y;
-            
+
             var infoPanelTransform = Instance.SpotterNotice.transform.parent;
             infoPanelTransform.parent = Singleton<GameUI>.Instance.transform;
             infoPanelTransform.localPosition = new Vector3(0, -370f, 0);
             infoPanelTransform.localScale = Vector3.one;
-            
+
             return Instance;
         }
 
-        private void Update()
+        public void BatchUpdate()
         {
-            if (!gameObject.activeInHierarchy) return;
+            if (!gameObject.activeInHierarchy) 
+            {
+                return;
+            }
+
             RenderUI();
             HandleInput();
         }
 
+        private void Start()
+        {
+            UpdateManager.Instance.RegisterSlicedUpdate(this, UpdateManager.UpdateMode.Always);
+        }
+
+        private void OnDestroy()
+        {
+            UpdateManager.Instance.DeregisterSlicedUpdate(this);
+        }
+
         private void RenderUI()
         {
-            var enabledColor = new Color(1, 1, 1, 1);
-            var disabledColor = new Color(1, 1, 1, 0.4f);
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
+            var rangefinderInHands = ModHelper.HasRangefinderInHands();
 
             tooltip.SetUnlockStatus(rangefinderInHands);
-            
+
             if (!rangefinderInHands)
             {
                 return;
             }
 
-            var fireSupportController = FireSupportController.Instance;
-            if (fireSupportController.StrafeRequestAvailable)
+            var fsController = FireSupportController.Instance;
+            if (fsController == null)
             {
-                supportOptions[2].AmountText.color = enabledColor;
-                supportOptions[2].Icon.color = enabledColor;
+                return;
+            }
+
+            RenderSupportOption(2, fsController.StrafeRequestAvailable, fsController.AvailableStrafeRequests, Plugin.StrafeCost.Value);
+            RenderSupportOption(4, fsController.ExtractRequestAvailable, fsController.AvailableExtractRequests, Plugin.HelicopterCost.Value);
+            RenderSupportOption(6, fsController.ApacheRequestAvailable, fsController.AvailableApacheRequests, Plugin.ApacheCost.Value);
+        }
+
+        private void RenderSupportOption(int index, bool requestAvailable, int availableRequests, int requestCost)
+        {
+            var enabledColor = new Color(1, 1, 1, 1);
+            var disabledColor = new Color(1, 1, 1, 0.4f);
+
+            if (requestAvailable)
+            {
+                supportOptions[index].AmountText.color = enabledColor;
+                supportOptions[index].Icon.color = enabledColor;
             }
             else
             {
-                supportOptions[2].IsUnderPointer = false;
-                supportOptions[2].AmountText.color = disabledColor;
-                supportOptions[2].Icon.color = disabledColor;
+                supportOptions[index].IsUnderPointer = false;
+                supportOptions[index].AmountText.color = disabledColor;
+                supportOptions[index].Icon.color = disabledColor;
             }
 
-            if (fireSupportController.ExtractRequestAvailable)
-            {
-                supportOptions[4].AmountText.color = enabledColor;
-                supportOptions[4].Icon.color = enabledColor;
-            }
-            else
-            {
-                supportOptions[4].IsUnderPointer = false;
-                supportOptions[4].AmountText.color = disabledColor;
-                supportOptions[4].Icon.color = disabledColor;
-            }
-
-            supportOptions[2].AmountText.text = fireSupportController.AvailableStrafeRequests.ToString();
-            supportOptions[4].AmountText.text = fireSupportController.AvailableExtractRequests.ToString();
+            supportOptions[index].AmountText.text = $"Available: {availableRequests}\nCost: {requestCost} {Plugin.SupportCostCurrency.Value}";
         }
 
         private void HandleInput()
         {
             if (!IsUnderPointer) return;
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
-            if (!rangefinderInHands) return;
+            if (!ModHelper.HasRangefinderInHands()) return;
             float angle = CalculateAngle();
 
             for (int i = 0; i < supportOptions.Length; i++)
             {
-                if (angle > i * 45 && angle < (i + 1) * 45 && FireSupportController.Instance.AnyRequestAvailable)
+                if (angle > i * 45 && angle < (i + 1) * 45)
                 {
-                    supportOptions[i].IsUnderPointer = true;
-                    _selectedSupportOption = (ESupportType)i;
+                    if (i == 2 && FireSupportController.Instance.StrafeRequestAvailable
+                        || i == 4 && FireSupportController.Instance.ExtractRequestAvailable
+                        || i == 6 && FireSupportController.Instance.ApacheRequestAvailable)
+                    {
+                        supportOptions[i].IsUnderPointer = true;
+                        _selectedSupportOption = (SupportType)i;
+                    }
                 }
                 else
                 {
@@ -114,15 +130,15 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                 }
             }
 
-            if (!Input.GetMouseButtonDown(0)) return;
+            if (!(Input.GetMouseButtonDown(0) && )) return;
             SupportRequested?.Invoke(_selectedSupportOption);
         }
 
         private float CalculateAngle()
         {
             Vector2 mouse;
-            mouse.x = Input.mousePosition.x - (Screen.width / 2f);
-            mouse.y = Input.mousePosition.y - (Screen.height / 2f) + _menuOffset;
+            mouse.x = Input.mousePosition.x - Screen.width / 2f;
+            mouse.y = Input.mousePosition.y - Screen.height / 2f + _menuOffset;
             mouse.Normalize();
 
             if (mouse == Vector2.zero)
@@ -142,12 +158,12 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             return angle;
         }
 
-        void IPointerEnterHandler.OnPointerEnter(PointerEventData data)
+        void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             IsUnderPointer = true;
         }
 
-        void IPointerExitHandler.OnPointerExit(PointerEventData data)
+        void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
         {
             IsUnderPointer = false;
 

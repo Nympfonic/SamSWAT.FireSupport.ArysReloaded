@@ -1,8 +1,8 @@
-﻿using System;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
+using SamSWAT.FireSupport.ArysReloaded.Unity;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Utils
@@ -10,45 +10,46 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
     internal static class WeaponClass
     {
         private static BallisticsCalculator _calc;
-        private static string _player;
+        private static string _playerProfileId;
         private static Weapon _gau8Weapon;
-        private static bool _instantiated;
+        private static Weapon _m230Weapon;
+        private static Weapon _hydra70Weapon;
 
-        private static readonly CreateShotDelegate CreateShot;
-        private static readonly Action<BallisticsCalculator, object> Shoot;
-
-        private delegate object CreateShotDelegate(BallisticsCalculator instance, object ammo, Vector3 origin,
-            Vector3 direction, int fireIndex, string player, Item weapon, float speedFactor = 1f, int fragmentIndex = 0);
-
-        static WeaponClass()
-        {
-            var type = typeof(BallisticsCalculator);
-            var shootMethod = type.GetMethod(nameof(BallisticsCalculator.Shoot));
-            var createShotMethod = type.GetMethod(nameof(BallisticsCalculator.CreateShot));
-            Shoot = AccessToolsUtil.MethodDelegate<Action<BallisticsCalculator, object>>(shootMethod, false);
-            CreateShot = AccessToolsUtil.MethodDelegate<CreateShotDelegate>(createShotMethod);
-        }
-        
         public static void Init()
         {
-            var gameWorld = Singleton<GameWorld>.Instance;
-            _calc = gameWorld._sharedBallisticsCalculator;
-            _player = gameWorld.MainPlayer.ProfileId;
-            
-            var newId = Guid.NewGuid().ToString("N").Substring(0, 24);
-            _gau8Weapon = (Weapon)ItemFactoryUtil.CreateItem(newId, "weapon_ge_gau8_avenger_30x173");
+            var itemFactory = ModHelper.ItemFactory;
+            _calc = ModHelper.GameWorld?._sharedBallisticsCalculator;
+            _playerProfileId = ModHelper.MainPlayer?.ProfileId;
+
+            _gau8Weapon = (Weapon)itemFactory.CreateItem(MongoID.Generate(), ModHelper.GAU8_WEAPON_TPL, null);
+            _m230Weapon = (Weapon)itemFactory.CreateItem(MongoID.Generate(), ModHelper.M230_WEAPON_TPL, null);
+            _hydra70Weapon = (Weapon)itemFactory.CreateItem(MongoID.Generate(), ModHelper.HYDRA70_WEAPON_TPL, null);
         }
 
-        public static void FireProjectile(object ammo, Vector3 origin, Vector3 direction)
+        public static void FireProjectile(WeaponType weaponType, BulletClass ammo, Vector3 origin, Vector3 direction)
         {
-            var projectile = CreateShot(_calc, ammo, origin, direction, 0, _player, _gau8Weapon);
-            Shoot(_calc, projectile);
+            EftBulletClass projectile;
+            switch (weaponType)
+            {
+                case WeaponType.GAU8:
+                    projectile = _calc.CreateShot(ammo, origin, direction, 0, _playerProfileId, _gau8Weapon);
+                    break;
+                case WeaponType.M230:
+                    projectile = _calc.CreateShot(ammo, origin, direction, 0, _playerProfileId, _m230Weapon);
+                    break;
+                case WeaponType.Hydra70:
+                    projectile = _calc.CreateShot(ammo, origin, direction, 0, _playerProfileId, _hydra70Weapon);
+                    break;
+                default:
+                    return;
+            }
+
+            _calc.Shoot(projectile);
         }
-        
-        public static object GetAmmo(string tid)
+
+        public static BulletClass GetAmmo(string tpl)
         {
-            var id = Guid.NewGuid().ToString("N").Substring(0, 24);
-            return ItemFactoryUtil.CreateItem(id, tid);
+            return ModHelper.ItemFactory.CreateItem(MongoID.Generate(), tpl, null) as BulletClass;
         }
     }
 }

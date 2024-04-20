@@ -1,21 +1,20 @@
-﻿using System;
+﻿using EFT;
+using SamSWAT.FireSupport.ArysReloaded.Unity.Vehicles;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using System.Collections;
 using System.Threading.Tasks;
-using Comfort.Common;
-using EFT;
-using SamSWAT.FireSupport.ArysReloaded.Utils;
 using UnityEngine;
 
-namespace SamSWAT.FireSupport.ArysReloaded.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity.Interface
 {
     public class FireSupportSpotter : ScriptableObject
     {
         [SerializeField] private GameObject[] spotterParticles;
-        private Vector3 _spotterPosition;
-        private Vector3 _strafeStartPosition;
-        private Vector3 _strafeEndPosition;
-        private Vector3 _colliderRotation;
-        private bool _requestCanceled;
+        public Vector3 SpotterPosition { get; private set; }
+        public Vector3 StrafeStartPosition { get; private set; }
+        public Vector3 StrafeEndPosition { get; private set; }
+        public Vector3 ColliderRotation { get; private set; }
+        public bool RequestCancelled { get; private set; }
         private GameObject _inputManager;
         private Player _player;
 
@@ -23,40 +22,22 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             var instance = await AssetLoader.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
             instance._inputManager = GameObject.Find("___Input");
-            instance._player = Singleton<GameWorld>.Instance.MainPlayer;
+            instance._player = ModHelper.MainPlayer;
             return instance;
         }
 
-        public IEnumerator SpotterSequence(ESupportType supportType, Action<bool, Vector3, Vector3> confirmation)
+        public IEnumerator SpotterVertical(bool checkSpace)
         {
-            switch (supportType)
-            {
-                case ESupportType.Strafe:
-                    yield return StaticManager.BeginCoroutine(SpotterVertical(false));
-                    yield return StaticManager.BeginCoroutine(SpotterHorizontal());
-                    yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    confirmation(_requestCanceled, _strafeStartPosition, _strafeEndPosition);
-                    break;
-                case ESupportType.Extract:
-                    yield return StaticManager.BeginCoroutine(SpotterVertical(true));
-                    yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    confirmation(_requestCanceled, _spotterPosition, _colliderRotation);
-                    break;
-            }
-        }
-
-        private IEnumerator SpotterVertical(bool checkSpace)
-        {
-            _requestCanceled = false;
+            RequestCancelled = false;
             var spotterVertical = Instantiate(spotterParticles[0]);
             var colliderChecker = spotterVertical.GetComponentInChildren<ColliderReporter>();
-            yield return new WaitForSecondsRealtime(.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (isRequestCancelled())
+                if (IsRequestCancelled())
                 {
                     Destroy(spotterVertical);
-                    _requestCanceled = true;
+                    RequestCancelled = true;
                     FireSupportUI.Instance.SpotterNotice.SetActive(false);
                     FireSupportUI.Instance.SpotterHeliNotice.SetActive(false);
                     yield break;
@@ -74,7 +55,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     {
                         var transform = colliderChecker.transform;
                         transform.Rotate(Vector3.up, 5f);
-                        _colliderRotation = transform.eulerAngles;
+                        ColliderRotation = transform.eulerAngles;
                     }
                 }
 
@@ -84,33 +65,33 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
             if (spotterVertical.transform.position == Vector3.zero || checkSpace && colliderChecker.HasCollision)
             {
-                _requestCanceled = true;
-                FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationDoesNotHear);
+                RequestCancelled = true;
+                FireSupportAudio.Instance.PlayVoiceover(VoiceoverType.StationDoesNotHear);
                 FireSupportUI.Instance.SpotterNotice.SetActive(false);
                 FireSupportUI.Instance.SpotterHeliNotice.SetActive(false);
                 Destroy(spotterVertical);
             }
             else
             {
-                _spotterPosition = spotterVertical.transform.position;
+                SpotterPosition = spotterVertical.transform.position;
                 Destroy(spotterVertical);
             }
         }
 
-        private IEnumerator SpotterHorizontal()
+        public IEnumerator SpotterHorizontal()
         {
-            if (_requestCanceled) yield break;
+            if (RequestCancelled) yield break;
 
-            var spotterHorizontal = Instantiate(spotterParticles[1], _spotterPosition, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(.1f);
+            var spotterHorizontal = Instantiate(spotterParticles[1], SpotterPosition, Quaternion.identity);
+            yield return new WaitForSecondsRealtime(0.1f);
             _inputManager.SetActive(false);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (isRequestCancelled())
+                if (IsRequestCancelled())
                 {
                     Destroy(spotterHorizontal);
                     _inputManager.SetActive(true);
-                    _requestCanceled = true;
+                    RequestCancelled = true;
                     yield break;
                 }
                 float xAxisRotation = Input.GetAxis("Mouse X") * 5;
@@ -119,29 +100,25 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             }
 
             _inputManager.SetActive(true);
-            _strafeStartPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (6)").position;
-            _strafeEndPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (1)").position;
+            StrafeStartPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (6)").position;
+            StrafeEndPosition = spotterHorizontal.transform.Find("Spotter Arrow Core (1)").position;
             Destroy(spotterHorizontal);
         }
 
-        private IEnumerator SpotterConfirmation()
+        public IEnumerator SpotterConfirmation()
         {
-            if (_requestCanceled) yield break;
-            
-            var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(.8f);
+            if (RequestCancelled) yield break;
+
+            var spotterConfirmation = Instantiate(spotterParticles[2], SpotterPosition + Vector3.up, Quaternion.identity);
+            yield return new WaitForSecondsRealtime(0.8f);
             Destroy(spotterConfirmation);
         }
 
-        private bool isRequestCancelled()
+        private bool IsRequestCancelled()
         {
-            if ((Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
-                || _player.HandsController.Item.TemplateId != ItemConstants.RANGEFINDER_TPL)
-            {
-                return true;
-            }
-
-            return false;
+            return Input.GetMouseButtonDown(1)
+                && Input.GetKey(KeyCode.LeftAlt)
+                || _player.HandsController.Item.TemplateId != ModHelper.RANGEFINDER_TPL;
         }
     }
 }

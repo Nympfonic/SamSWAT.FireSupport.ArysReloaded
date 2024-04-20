@@ -40,7 +40,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
 		    return LoadAssetAsync<GameObject>(bundle, assetName);
 	    }
 	    
-		public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
+		public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null)
+			where T : Object
 		{
 			var ab = await LoadBundleAsync(bundle);
 

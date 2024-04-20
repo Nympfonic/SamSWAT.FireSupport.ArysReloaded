@@ -1,12 +1,13 @@
 ﻿//CREDIT TO AiKodex
 //https://assetstore.unity.com/packages/tools/integration/simple-spin-blur-202273
 
+using SamSWAT.FireSupport.ArysReloaded.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
-    public class SimpleSpinBlur : MonoBehaviour
+    public class SimpleSpinBlur : MonoBehaviour, IBatchUpdate
     {
         private Mesh _ssbMesh;
         private Material _ssbMaterial;
@@ -27,14 +28,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         [Tooltip("[Optimization] Angular velocity threshold value before which the effects will not be rendered.")]
         public float angularVelocityCutoff;
 
-        private void Start()
-        {
-            _ssbMesh = GetComponent<MeshFilter>().mesh;
-            _ssbMaterial = GetComponent<MeshRenderer>().sharedMaterial;
-            _ssbMaterial.enableInstancing = enableGPUInstancing;
-        }
-
-        private void Update()
+        public void BatchUpdate()
         {
             if (rotationQueue.Count >= shutterSpeed)
             {
@@ -51,21 +45,56 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             {
                 for (int i = 0; i <= samples; i++)
                 {
-                    Graphics.DrawMesh(_ssbMesh, transform.position,
+                    Graphics.DrawMesh(
+                        _ssbMesh,
+                        transform.position,
                         Quaternion.Lerp(rotationQueue.Peek(), transform.rotation, i / (float) samples),
-                        _ssbMaterial, 0, null, 0);
+                        _ssbMaterial,
+                        0,
+                        null,
+                        0
+                    );
                 }
 
-                var tempColor = new Color(_ssbMaterial.color.r, _ssbMaterial.color.g, _ssbMaterial.color.b,
-                    Mathf.Abs((2 / (float) samples) + alphaOffset));
+                var tempColor = new Color(
+                    _ssbMaterial.color.r,
+                    _ssbMaterial.color.g,
+                    _ssbMaterial.color.b,
+                    Mathf.Abs((2 / (float) samples) + alphaOffset)
+                );
+
                 _ssbMaterial.color = tempColor;
             }
             else
             {
-                if (!(_ssbMaterial.color.a < 1)) return;
-                var tempColor = new Color(_ssbMaterial.color.r, _ssbMaterial.color.g, _ssbMaterial.color.b, 1);
+                if (_ssbMaterial.color.a >= 1)
+                {
+                    return;
+                }
+
+                var tempColor = new Color(
+                    _ssbMaterial.color.r,
+                    _ssbMaterial.color.g,
+                    _ssbMaterial.color.b,
+                    1
+                );
+
                 _ssbMaterial.color = tempColor;
             }
+        }
+
+        private void Start()
+        {
+            _ssbMesh = GetComponent<MeshFilter>().mesh;
+            _ssbMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+            _ssbMaterial.enableInstancing = enableGPUInstancing;
+
+            UpdateManager.Instance.RegisterSlicedUpdate(this, UpdateManager.UpdateMode.Always);
+        }
+
+        private void OnDestroy()
+        {
+            UpdateManager.Instance.DeregisterSlicedUpdate(this);
         }
     }
 }

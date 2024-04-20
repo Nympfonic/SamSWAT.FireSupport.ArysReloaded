@@ -1,24 +1,18 @@
-﻿using System;
+﻿using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
-    public class ColliderReporter : MonoBehaviour
+    public class ColliderReporter : MonoBehaviour, IBatchUpdate
     {
         [NonSerialized] 
         public bool HasCollision;
         private BoxCollider[] _colliders;
         private Collider[] _intersectedColliders;
-        private int _mask;
-
-        private void Start()
-        {
-            _intersectedColliders = new Collider[5];
-            _colliders = GetComponents<BoxCollider>();
-            _mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
-        }
+        private int _mask;        
         
-        private void Update()
+        public void BatchUpdate()
         {
             foreach (var col in _colliders)
             {
@@ -43,6 +37,20 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
                 HasCollision = false;
             }
+        }
+
+        private void Start()
+        {
+            _intersectedColliders = new Collider[5];
+            _colliders = GetComponents<BoxCollider>();
+            _mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
+
+            UpdateManager.Instance.RegisterSlicedUpdate(this, UpdateManager.UpdateMode.Always);
+        }
+
+        private void OnDestroy()
+        {
+            UpdateManager.Instance.DeregisterSlicedUpdate(this);
         }
     }
 }
