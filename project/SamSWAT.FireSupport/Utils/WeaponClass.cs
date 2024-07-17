@@ -13,7 +13,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
         private static BallisticsCalculator _calc;
         private static string _player;
         private static Weapon _gau8Weapon;
-        private static bool _instantiated;
 
         private static readonly CreateShotDelegate CreateShot;
         private static readonly Action<BallisticsCalculator, object> Shoot;
