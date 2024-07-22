@@ -18,7 +18,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
 			if (LoadedBundles.TryGetValue(bundleName, out var bundle))
 				return bundle;
 
-			var bundleRequest = AssetBundle.LoadFromFileAsync(Plugin.Directory + bundlePath);
+			var bundleRequest = AssetBundle.LoadFromFileAsync(FireSupportPlugin.Directory + bundlePath);
 
 			while (!bundleRequest.isDone)
 				await Task.Yield();
@@ -31,7 +31,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
 				return requestedBundle;
 			}
 
-			Plugin.LogSource.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
+			FireSupportPlugin.LogSource.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
 			return null;
 		}
 
@@ -53,7 +53,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
 
 			if (assetBundleRequest.allAssets.Length == 0)
 			{
-				Plugin.LogSource.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
+				FireSupportPlugin.LogSource.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
 				return null;
 			}
 			
@@ -71,7 +71,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
             }
 			else
 			{
-				Plugin.LogSource.LogError($"AssetBundle '{bundleName}' already unloaded");
+				FireSupportPlugin.LogSource.LogError($"AssetBundle '{bundleName}' already unloaded");
 			}
 		}
 

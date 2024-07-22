@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
-    public class UH60Behaviour : MonoBehaviour, IFireSupportOption
+    public class UH60Behaviour : MonoBehaviour, IComponent, IFireSupportOption
     {
         private static readonly int FlySpeedMultiplier = Animator.StringToHash("FlySpeedMultiplier");
         private static readonly int FlyAway = Animator.StringToHash("FlyAway");
@@ -22,17 +22,27 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var heliTransform = transform;
             heliTransform.position = position;
             heliTransform.eulerAngles = rotation;
-            helicopterAnimator.SetFloat(FlySpeedMultiplier, Plugin.HelicopterSpeedMultiplier.Value);
+            helicopterAnimator.SetFloat(FlySpeedMultiplier, FireSupportPlugin.HelicopterSpeedMultiplier.Value);
+        }
+
+        public void ManualUpdate()
+        {
+            CrossFadeAudio();
         }
 
         public void ReturnToPool()
         {
             gameObject.SetActive(false);
         }
-
-        private void Update()
+        
+        private void Start()
         {
-            CrossFadeAudio();
+            FireSupportPlugin.RegisterComponent(this);
+        }
+
+        private void OnDestroy()
+        {
+            FireSupportPlugin.DeregisterComponent(this);
         }
 
         private void CrossFadeAudio()
@@ -53,10 +63,10 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         {
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliPickingUp);
             CreateExfilPoint();
-            var waitTime = Plugin.HelicopterWaitTime.Value * 0.75f;
+            var waitTime = FireSupportPlugin.HelicopterWaitTime.Value * 0.75f;
             yield return new WaitForSeconds(waitTime);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliHurry);
-            yield return new WaitForSeconds(Plugin.HelicopterWaitTime.Value - waitTime);
+            yield return new WaitForSeconds(FireSupportPlugin.HelicopterWaitTime.Value - waitTime);
             helicopterAnimator.SetTrigger(FlyAway);
             Destroy(_extractionPoint);
             FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliLeavingNoPickup);

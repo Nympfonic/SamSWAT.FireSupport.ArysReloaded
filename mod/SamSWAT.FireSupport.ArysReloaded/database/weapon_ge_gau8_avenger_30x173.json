@@ -111,6 +111,7 @@
         "QuestItem": false,
         "QuestStashMaxCount": 0,
         "RagFairCommissionModifier": 1,
+        "RarityPvE": "Not_exist",
         "RecoilAngle": 90,
         "RecoilCenter": {
             "x": 0,

@@ -46,7 +46,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Patches
 			var locationIsSuitable = gameWorld.MainPlayer.Location.ToLower() == "sandbox"
 				|| LocationScene.GetAll<AirdropPoint>().Any();
 
-			if (!Plugin.Enabled.Value || FireSupportController.Instance != null || !locationIsSuitable)
+			if (!FireSupportPlugin.Enabled.Value || FireSupportController.Instance != null || !locationIsSuitable)
 			{
 				return false;
 			}

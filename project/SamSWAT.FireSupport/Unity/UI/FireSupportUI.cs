@@ -11,9 +11,8 @@ using UnityEngine.UI;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
-    public class FireSupportUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class FireSupportUI : MonoBehaviour, IComponent, IPointerEnterHandler, IPointerExitHandler
     {
-        private const string RANGEFINDER_TPL = "61605e13ffa6e502ac5e7eef";
         public GameObject SpotterNotice;
         public GameObject SpotterHeliNotice;
         public Text timerText;
@@ -25,6 +24,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
         public static FireSupportUI Instance { get; private set; }
         public bool IsUnderPointer { get; set; }
+
         public event Action<ESupportType> SupportRequested;
 
         public static async Task<FireSupportUI> Load(GesturesMenu gesturesMenu)
@@ -46,18 +46,28 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             return Instance;
         }
 
-        private void Update()
+        public void ManualUpdate()
         {
             if (!gameObject.activeInHierarchy) return;
             RenderUI();
             HandleInput();
         }
 
+        private void Start()
+        {
+            FireSupportPlugin.RegisterComponent(this);
+        }
+
+        private void OnDestroy()
+        {
+            FireSupportPlugin.DeregisterComponent(this);
+        }
+
         private void RenderUI()
         {
             var enabledColor = new Color(1, 1, 1, 1);
             var disabledColor = new Color(1, 1, 1, 0.4f);
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == RANGEFINDER_TPL;
+            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
 
             tooltip.SetUnlockStatus(rangefinderInHands);
 
@@ -98,7 +108,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private void HandleInput()
         {
             if (!IsUnderPointer) return;
-            var rangefinderInHands = _player.HandsController.Item.TemplateId == RANGEFINDER_TPL;
+            var rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
             if (!rangefinderInHands) return;
             float angle = CalculateAngle();
 
@@ -143,12 +153,12 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             return angle;
         }
 
-        void IPointerEnterHandler.OnPointerEnter(PointerEventData data)
+        void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             IsUnderPointer = true;
         }
 
-        void IPointerExitHandler.OnPointerExit(PointerEventData data)
+        void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
         {
             IsUnderPointer = false;
 

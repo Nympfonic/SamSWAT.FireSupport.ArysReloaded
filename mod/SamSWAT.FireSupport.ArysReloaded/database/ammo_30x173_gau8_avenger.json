@@ -93,6 +93,7 @@
         "QuestItem": false,
         "QuestStashMaxCount": 0,
         "RagFairCommissionModifier": 1,
+        "RarityPvE": "Not_exist",
         "RemoveShellAfterFire": false,
         "RepairCost": 0,
         "RepairSpeed": 0,

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity
 {
-    public class ColliderReporter : MonoBehaviour
+    public class ColliderReporter : MonoBehaviour, IComponent
     {
         [NonSerialized] 
         public bool HasCollision;
@@ -11,14 +11,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private Collider[] _intersectedColliders;
         private int _mask;
 
-        private void Start()
-        {
-            _intersectedColliders = new Collider[5];
-            _colliders = GetComponents<BoxCollider>();
-            _mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
-        }
-        
-        private void Update()
+        public void ManualUpdate()
         {
             foreach (var col in _colliders)
             {
@@ -43,6 +36,19 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
                 HasCollision = false;
             }
+        }
+
+        private void Start()
+        {
+            FireSupportPlugin.RegisterComponent(this);
+            _intersectedColliders = new Collider[5];
+            _colliders = GetComponents<BoxCollider>();
+            _mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
+        }
+
+        private void OnDestroy()
+        {
+            FireSupportPlugin.DeregisterComponent(this);
         }
     }
 }

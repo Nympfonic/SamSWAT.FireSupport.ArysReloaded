@@ -12,9 +12,11 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
     public class HeliExfiltrationPoint : MonoBehaviour, IPhysicsTrigger
     {
         private float _timer;
-        public string Description => "HeliExfiltrationPoint";
         private Coroutine _coroutine;
         private MethodInfo _stopSession;
+        private BattleUIPanelExitTrigger _battleUIPanelExitTrigger;
+
+        public string Description => "HeliExfiltrationPoint";
 
         private HeliExfiltrationPoint()
         {
@@ -22,14 +24,42 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             _stopSession = t.GetMethod("StopSession");
         }
 
-        public void OnTriggerEnter(Collider other)
+        private void Start()
         {
-            var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(other);
+            _battleUIPanelExitTrigger = Singleton<GameUI>.Instance.BattleUiPanelExitTrigger;
+        }
+
+        public void OnTriggerEnter(Collider collider)
+        {
+            var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(collider);
             if (player == null || !player.IsYourPlayer) return;
 
-            _timer = Plugin.HelicopterExtractTime.Value;
-            Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Show(_timer);
+            _timer = FireSupportPlugin.HelicopterExtractTime.Value;
+            _battleUIPanelExitTrigger.Show(_timer);
             _coroutine = StartCoroutine(Timer(player.ProfileId));
+        }
+
+        public void OnTriggerExit(Collider collider)
+        {
+            var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(collider);
+            if (player == null || !player.IsYourPlayer) return;
+
+            _timer = FireSupportPlugin.HelicopterExtractTime.Value;
+            _battleUIPanelExitTrigger.Close();
+
+            if (_coroutine == null) return;
+            StopCoroutine(_coroutine);
+        }
+
+        private void OnDestroy()
+        {
+            if (Singleton<GameUI>.Instantiated)
+            {
+                _battleUIPanelExitTrigger.Close();
+            }
+
+            if (_coroutine == null) return;
+            StopCoroutine(_coroutine);
         }
 
         private IEnumerator Timer(string profileId)
@@ -46,29 +76,6 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                 ExitStatus.Survived,
                 "UH-60 BlackHawk"
             });
-        }
-
-        public void OnTriggerExit(Collider other)
-        {
-            var player = Singleton<GameWorld>.Instance.GetPlayerByCollider(other);
-            if (player == null || !player.IsYourPlayer) return;
-
-            _timer = Plugin.HelicopterExtractTime.Value;
-            Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Close();
-
-            if (_coroutine == null) return;
-            StopCoroutine(_coroutine);
-        }
-
-        private void OnDestroy()
-        {
-            if (Singleton<GameUI>.Instantiated)
-            {
-                Singleton<GameUI>.Instance.BattleUiPanelExitTrigger.Close();
-            }
-
-            if (_coroutine == null) return;
-            StopCoroutine(_coroutine);
         }
     }
 }

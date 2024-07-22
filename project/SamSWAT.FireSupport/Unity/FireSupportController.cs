@@ -34,8 +34,8 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             Instance._gesturesMenu = gesturesMenu;
             await FireSupportPool.LoadBundlesAndCreatePools();
             WeaponClass.Init();
-            Instance.AvailableStrafeRequests = Plugin.AmountOfStrafeRequests.Value;
-            Instance.AvailableExtractRequests = Plugin.AmountOfExtractionRequests.Value;
+            Instance.AvailableStrafeRequests = FireSupportPlugin.AmountOfStrafeRequests.Value;
+            Instance.AvailableExtractRequests = FireSupportPlugin.AmountOfExtractionRequests.Value;
             Instance._audio.PlayVoiceover(EVoiceoverType.StationReminder);
             Instance._ui.SupportRequested += Instance.OnSupportRequested;
             return Instance;
@@ -76,7 +76,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             var pos = (strafeStartPos + strafeEndPos) / 2;
             var dir = (strafeEndPos - strafeStartPos).normalized;
             AvailableStrafeRequests--;
-            _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));
+            _timerCoroutine = StaticManager.BeginCoroutine(Timer(FireSupportPlugin.RequestCooldown.Value));
             _audio.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
             yield return new WaitForSecondsRealtime(8f);
             _audio.PlayVoiceover(EVoiceoverType.JetArriving);
@@ -92,9 +92,9 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             yield return new WaitForSecondsRealtime(8f);
             uh60.ProcessRequest(position, Vector3.zero, rotation);
             _audio.PlayVoiceover(EVoiceoverType.SupportHeliArrivingToPickup);
-            yield return new WaitForSecondsRealtime(35f + Plugin.HelicopterWaitTime.Value);
+            yield return new WaitForSecondsRealtime(35f + FireSupportPlugin.HelicopterWaitTime.Value);
             if (Instance == null) yield break;
-            _timerCoroutine = StaticManager.BeginCoroutine(Timer(Plugin.RequestCooldown.Value));
+            _timerCoroutine = StaticManager.BeginCoroutine(Timer(FireSupportPlugin.RequestCooldown.Value));
         }
 
         private IEnumerator Timer(float time)

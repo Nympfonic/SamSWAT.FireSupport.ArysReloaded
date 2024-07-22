@@ -15,14 +15,20 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
         private Vector3 _strafeStartPosition;
         private Vector3 _strafeEndPosition;
         private Vector3 _colliderRotation;
-        private bool _requestCanceled;
+        private bool _requestCancelled;
         private GameObject _inputManager;
         private Player _player;
 
         public static async Task<FireSupportSpotter> Load()
         {
             var instance = await AssetLoader.LoadAssetAsync<FireSupportSpotter>("assets/content/ui/firesupport_spotter.bundle");
-            instance._inputManager = GameObject.Find("___Input");
+
+            while (InputManagerUtil.GetInputManager() == null)
+            {
+                await Task.Yield();
+            }
+
+            instance._inputManager = InputManagerUtil.GetInputManager().gameObject;
             instance._player = Singleton<GameWorld>.Instance.MainPlayer;
             return instance;
         }
@@ -35,28 +41,28 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     yield return StaticManager.BeginCoroutine(SpotterVertical(false));
                     yield return StaticManager.BeginCoroutine(SpotterHorizontal());
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    confirmation(_requestCanceled, _strafeStartPosition, _strafeEndPosition);
+                    confirmation(_requestCancelled, _strafeStartPosition, _strafeEndPosition);
                     break;
                 case ESupportType.Extract:
                     yield return StaticManager.BeginCoroutine(SpotterVertical(true));
                     yield return StaticManager.BeginCoroutine(SpotterConfirmation());
-                    confirmation(_requestCanceled, _spotterPosition, _colliderRotation);
+                    confirmation(_requestCancelled, _spotterPosition, _colliderRotation);
                     break;
             }
         }
 
         private IEnumerator SpotterVertical(bool checkSpace)
         {
-            _requestCanceled = false;
+            _requestCancelled = false;
             var spotterVertical = Instantiate(spotterParticles[0]);
             var colliderChecker = spotterVertical.GetComponentInChildren<ColliderReporter>();
             yield return new WaitForSecondsRealtime(.1f);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (isRequestCancelled())
+                if (IsRequestCancelled())
                 {
                     Destroy(spotterVertical);
-                    _requestCanceled = true;
+                    _requestCancelled = true;
                     FireSupportUI.Instance.SpotterNotice.SetActive(false);
                     FireSupportUI.Instance.SpotterHeliNotice.SetActive(false);
                     yield break;
@@ -84,7 +90,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
             if (spotterVertical.transform.position == Vector3.zero || checkSpace && colliderChecker.HasCollision)
             {
-                _requestCanceled = true;
+                _requestCancelled = true;
                 FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationDoesNotHear);
                 FireSupportUI.Instance.SpotterNotice.SetActive(false);
                 FireSupportUI.Instance.SpotterHeliNotice.SetActive(false);
@@ -99,18 +105,18 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
         private IEnumerator SpotterHorizontal()
         {
-            if (_requestCanceled) yield break;
+            if (_requestCancelled) yield break;
 
             var spotterHorizontal = Instantiate(spotterParticles[1], _spotterPosition, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.1f);
             _inputManager.SetActive(false);
             while (!Input.GetMouseButtonDown(0))
             {
-                if (isRequestCancelled())
+                if (IsRequestCancelled())
                 {
                     Destroy(spotterHorizontal);
                     _inputManager.SetActive(true);
-                    _requestCanceled = true;
+                    _requestCancelled = true;
                     yield break;
                 }
                 float xAxisRotation = Input.GetAxis("Mouse X") * 5;
@@ -126,22 +132,17 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
 
         private IEnumerator SpotterConfirmation()
         {
-            if (_requestCanceled) yield break;
+            if (_requestCancelled) yield break;
 
             var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
             yield return new WaitForSecondsRealtime(.8f);
             Destroy(spotterConfirmation);
         }
 
-        private bool isRequestCancelled()
+        private bool IsRequestCancelled()
         {
-            if ((Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
-                || _player.HandsController.Item.TemplateId != ItemConstants.RANGEFINDER_TPL)
-            {
-                return true;
-            }
-
-            return false;
+            return (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftAlt))
+                || (_player != null && _player.HandsController.Item.TemplateId != ItemConstants.RANGEFINDER_TPL);
         }
     }
 }

@@ -1,23 +1,18 @@
 ﻿using EFT.InventoryLogic;
+using HarmonyLib;
 using SPT.Reflection.Patching;
-using SPT.Reflection.Utils;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Utils
 {
 	internal class ItemFactoryUtil : ModulePatch
 	{
-		internal static readonly Type Type;
-		private static object _instance;
-		private static CreateItemDelegate _createItemDelegate;
-		private delegate Item CreateItemDelegate(object instance, string id, string tplId, object diff = null);
+		internal static readonly Type Type = typeof(ItemFactory);
+		private static readonly MethodInfo _createItemMethod = AccessTools.DeclaredMethod(Type, nameof(ItemFactory.CreateItem));
 
-		static ItemFactoryUtil()
-		{
-			Type = PatchConstants.EftTypes.Single(x => x.GetMethod("FlatItemsToTree") != null);
-		}
+		private static CreateItemDelegate _createItemDelegate;
+		private delegate Item CreateItemDelegate(string id, string tplId, object diff = null);
 
 		protected override MethodBase GetTargetMethod()
 		{
@@ -25,16 +20,14 @@ namespace SamSWAT.FireSupport.ArysReloaded.Utils
 		}
 
 		[PatchPostfix]
-		private static void PatchPostfix(object __instance)
+		private static void PatchPostfix(ItemFactory __instance)
 		{
-			_instance = __instance;
-			var method = __instance.GetType().GetMethod("CreateItem");
-			_createItemDelegate = AccessToolsUtil.MethodDelegate<CreateItemDelegate>(method, false);
+			_createItemDelegate = AccessTools.MethodDelegate<CreateItemDelegate>(_createItemMethod, __instance, false);
 		}
 
 		public static Item CreateItem(string id, string tplId)
 		{
-			return _createItemDelegate(_instance, id, tplId);
+			return _createItemDelegate(id, tplId);
 		}
 	}
 }

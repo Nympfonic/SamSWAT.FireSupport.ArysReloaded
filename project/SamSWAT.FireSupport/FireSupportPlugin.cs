@@ -3,13 +3,16 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using SamSWAT.FireSupport.ArysReloaded.Database;
 using SamSWAT.FireSupport.ArysReloaded.Patches;
+using SamSWAT.FireSupport.ArysReloaded.Unity;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
 namespace SamSWAT.FireSupport.ArysReloaded
 {
-    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.4")]
-    public class Plugin : BaseUnityPlugin
+    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.5")]
+    public class FireSupportPlugin : BaseUnityPlugin
     {
         public static string Directory;
         internal static ManualLogSource LogSource;
@@ -22,6 +25,18 @@ namespace SamSWAT.FireSupport.ArysReloaded
         internal static ConfigEntry<int> RequestCooldown;
         internal static ConfigEntry<int> VoiceoverVolume;
 
+        private static readonly HashSet<IComponent> _componentsToUpdate = new HashSet<IComponent>();
+
+        public static void RegisterComponent(IComponent component)
+        {
+            _componentsToUpdate.Add(component);
+        }
+
+        public static void DeregisterComponent(IComponent component)
+        {
+            _componentsToUpdate.Remove(component);
+        }
+
         private void Awake()
         {
             LogSource = Logger;
@@ -29,7 +44,8 @@ namespace SamSWAT.FireSupport.ArysReloaded
             new GesturesMenuPatch().Enable();
             new AddItemToDatabasePatch().Enable();
             new AddLocaleToDatabasePatch().Enable();
-            new Utils.ItemFactoryUtil().Enable();
+            new ItemFactoryUtil().Enable();
+            new InputManagerUtil().Enable();
 
             Enabled = Config.Bind(
                 "",
@@ -78,6 +94,14 @@ namespace SamSWAT.FireSupport.ArysReloaded
                 90,
                 new ConfigDescription("",
                 new AcceptableValueRange<int>(0, 100)));
+        }
+
+        private void Update()
+        {
+            foreach (var component in _componentsToUpdate)
+            {
+                component.ManualUpdate();
+            }
         }
     }
 }

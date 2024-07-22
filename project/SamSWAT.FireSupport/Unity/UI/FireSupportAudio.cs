@@ -87,14 +87,13 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
                     voAudioClip = supportHeliLeavingNoPickup[Random.Range(0, supportHeliLeavingNoPickup.Length)];
                     break;
                 default:
-                    voAudioClip = null;
-                    break;
+                    return;
             }
 
             if (voAudioClip == null) return;
 
             var sourceGroup = BetterAudio.AudioSourceGroupType.Nonspatial;
-            var volume = Plugin.VoiceoverVolume.Value / 100f;
+            var volume = FireSupportPlugin.VoiceoverVolume.Value / 100f;
             Singleton<BetterAudio>.Instance.PlayNonspatial(voAudioClip, sourceGroup, 0, volume);
         }
     }
