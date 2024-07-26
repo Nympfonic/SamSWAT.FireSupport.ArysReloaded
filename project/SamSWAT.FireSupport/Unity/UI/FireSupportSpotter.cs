@@ -56,7 +56,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             _requestCancelled = false;
             var spotterVertical = Instantiate(spotterParticles[0]);
             var colliderChecker = spotterVertical.GetComponentInChildren<ColliderReporter>();
-            yield return new WaitForSecondsRealtime(.1f);
+            yield return new WaitForSeconds(.1f);
             while (!Input.GetMouseButtonDown(0))
             {
                 if (IsRequestCancelled())
@@ -108,7 +108,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             if (_requestCancelled) yield break;
 
             var spotterHorizontal = Instantiate(spotterParticles[1], _spotterPosition, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(.1f);
+            yield return new WaitForSeconds(.1f);
             _inputManager.SetActive(false);
             while (!Input.GetMouseButtonDown(0))
             {
@@ -135,7 +135,7 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity
             if (_requestCancelled) yield break;
 
             var spotterConfirmation = Instantiate(spotterParticles[2], _spotterPosition + Vector3.up, Quaternion.identity);
-            yield return new WaitForSecondsRealtime(.8f);
+            yield return new WaitForSeconds(.8f);
             Destroy(spotterConfirmation);
         }
 
