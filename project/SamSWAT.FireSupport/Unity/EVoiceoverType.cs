@@ -1,22 +1,21 @@
-﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity
+﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity;
+
+public enum EVoiceoverType
 {
-    public enum EVoiceoverType
-    {
-        StationReminder,
-        StationAvailable,
-        StationDoesNotHear,
-        StationStrafeRequest,
-        StationStrafeEnd,
-        StationExtractionRequest,
-        JetArriving,
-        JetFiring,
-        JetLeaving,
-        SupportHeliArriving,
-        SupportHeliArrivingToPickup,
-        SupportHeliPickingUp,
-        SupportHeliHurry,
-        SupportHeliLeaving,
-        SupportHeliLeavingAfterPickup,
-        SupportHeliLeavingNoPickup
-    }
+	StationReminder,
+	StationAvailable,
+	StationDoesNotHear,
+	StationStrafeRequest,
+	StationStrafeEnd,
+	StationExtractionRequest,
+	JetArriving,
+	JetFiring,
+	JetLeaving,
+	SupportHeliArriving,
+	SupportHeliArrivingToPickup,
+	SupportHeliPickingUp,
+	SupportHeliHurry,
+	SupportHeliLeaving,
+	SupportHeliLeavingAfterPickup,
+	SupportHeliLeavingNoPickup
 }

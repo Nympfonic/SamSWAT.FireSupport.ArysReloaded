@@ -1,8 +1,7 @@
-﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity
+﻿namespace SamSWAT.FireSupport.ArysReloaded.Unity;
+
+public enum ESupportType
 {
-    public enum ESupportType
-    {
-        Strafe = 2,
-        Extract = 4
-    }
+	Strafe = 2,
+	Extract = 4
 }
