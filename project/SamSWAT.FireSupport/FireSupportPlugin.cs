@@ -9,99 +9,117 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace SamSWAT.FireSupport.ArysReloaded
+namespace SamSWAT.FireSupport.ArysReloaded;
+
+[BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT's FireSupport: Arys Reloaded", "2.3.0")]
+public class FireSupportPlugin : BaseUnityPlugin
 {
-    [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT.FireSupport.ArysReloaded", "2.2.5")]
-    public class FireSupportPlugin : BaseUnityPlugin
-    {
-        public static string Directory;
-        internal static ManualLogSource LogSource;
-        internal static ConfigEntry<bool> Enabled;
-        internal static ConfigEntry<int> AmountOfStrafeRequests;
-        internal static ConfigEntry<int> AmountOfExtractionRequests;
-        internal static ConfigEntry<int> HelicopterWaitTime;
-        internal static ConfigEntry<float> HelicopterExtractTime;
-        internal static ConfigEntry<float> HelicopterSpeedMultiplier;
-        internal static ConfigEntry<int> RequestCooldown;
-        internal static ConfigEntry<int> VoiceoverVolume;
-
-        private static readonly HashSet<IComponent> _componentsToUpdate = new HashSet<IComponent>();
-
-        public static void RegisterComponent(IComponent component)
-        {
-            _componentsToUpdate.Add(component);
-        }
-
-        public static void DeregisterComponent(IComponent component)
-        {
-            _componentsToUpdate.Remove(component);
-        }
-
-        private void Awake()
-        {
-            LogSource = Logger;
-            Directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/";
-            new GesturesMenuPatch().Enable();
-            new AddItemToDatabasePatch().Enable();
-            new AddLocaleToDatabasePatch().Enable();
-            new ItemFactoryUtil().Enable();
-            new InputManagerUtil().Enable();
-
-            Enabled = Config.Bind(
-                "",
-                "Plugin state",
-                true,
-                new ConfigDescription("Enables/disables plugin"));
-            AmountOfStrafeRequests = Config.Bind(
-                "Main Settings",
-                "Amount of autocannon strafe requests",
-                2,
-                new ConfigDescription("",
-                new AcceptableValueRange<int>(0, 10)));
-            AmountOfExtractionRequests = Config.Bind(
-                "Main Settings",
-                "Amount of helicopter extraction requests",
-                1,
-                new ConfigDescription("",
-                    new AcceptableValueRange<int>(0, 10)));
-            HelicopterWaitTime = Config.Bind(
-                "Helicopter Extraction Settings",
-                "Helicopter wait time",
-                30,
-                new ConfigDescription("Helicopter wait time on extraction location (seconds)",
-                    new AcceptableValueRange<int>(10, 300)));
-            HelicopterExtractTime = Config.Bind(
-                "Helicopter Extraction Settings",
-                "Extraction time",
-                10f,
-                new ConfigDescription("How long you will need to stay in the exfil zone before extraction (seconds)",
-                    new AcceptableValueRange<float>(1f, 30f)));
-            HelicopterSpeedMultiplier = Config.Bind(
-                "Helicopter Extraction Settings",
-                "Helicopter speed multiplier",
-                1f,
-                new ConfigDescription("How fast the helicopter arrival animation will be played",
-                    new AcceptableValueRange<float>(0.8f, 1.5f)));
-            RequestCooldown = Config.Bind(
-                "Main Settings",
-                "Cooldown between support requests",
-                300,
-                new ConfigDescription("Seconds",
-                new AcceptableValueRange<int>(60, 3600)));
-            VoiceoverVolume = Config.Bind(
-                "Sound Settings",
-                "Voiceover volume",
-                90,
-                new ConfigDescription("",
-                new AcceptableValueRange<int>(0, 100)));
-        }
-
-        private void Update()
-        {
-            foreach (var component in _componentsToUpdate)
-            {
-                component.ManualUpdate();
-            }
-        }
-    }
+	private readonly List<ComponentBase> _componentsToUpdate = [];
+	
+	public static FireSupportPlugin Instance { get; private set; }
+	
+	internal static string Directory { get; private set; }
+	internal static ManualLogSource LogSource { get; private set; }
+	
+	internal static ConfigEntry<bool> Enabled { get; private set; }
+	internal static ConfigEntry<int> AmountOfStrafeRequests { get; private set; }
+	internal static ConfigEntry<int> AmountOfExtractionRequests { get; private set; }
+	internal static ConfigEntry<int> HelicopterWaitTime { get; private set; }
+	internal static ConfigEntry<float> HelicopterExtractTime { get; private set; }
+	internal static ConfigEntry<float> HelicopterSpeedMultiplier { get; private set; }
+	internal static ConfigEntry<int> RequestCooldown { get; private set; }
+	internal static ConfigEntry<int> VoiceoverVolume { get; private set; }
+	
+	public static void RegisterComponent(ComponentBase component)
+	{
+		Instance._componentsToUpdate.Add(component);
+	}
+	
+	public static void DeregisterComponent(ComponentBase component)
+	{
+		component.MarkForRemoval();
+	}
+	
+	private void Awake()
+	{
+		Instance = this;
+		LogSource = Logger;
+		Directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+		
+		new GesturesMenuPatch().Enable();
+		new AddItemToDatabasePatch().Enable();
+		new AddLocaleToDatabasePatch().Enable();
+		new InputManagerUtil().Enable();
+		
+		InitializeConfigBindings();
+	}
+	
+	private void Update()
+	{
+		if (_componentsToUpdate.Count == 0)
+		{
+			return;
+		}
+		
+		_componentsToUpdate.RemoveAll(x => x.IsMarkedForRemoval());
+		
+		for (int i = _componentsToUpdate.Count - 1; i >= 0; i--)
+		{
+			_componentsToUpdate[i].ManualUpdate();
+		}
+	}
+	
+	private void InitializeConfigBindings()
+	{
+		Enabled = Config.Bind(
+			"",
+			"Plugin state",
+			true,
+			new ConfigDescription("Enables/disables plugin"));
+		
+		AmountOfStrafeRequests = Config.Bind(
+			"Main Settings",
+			"Amount of autocannon strafe requests",
+			2,
+			new ConfigDescription("",
+				new AcceptableValueRange<int>(0, 10)));
+		AmountOfExtractionRequests = Config.Bind(
+			"Main Settings",
+			"Amount of helicopter extraction requests",
+			1,
+			new ConfigDescription("",
+				new AcceptableValueRange<int>(0, 10)));
+		RequestCooldown = Config.Bind(
+			"Main Settings",
+			"Cooldown between support requests",
+			300,
+			new ConfigDescription("Seconds",
+				new AcceptableValueRange<int>(60, 3600)));
+		
+		HelicopterWaitTime = Config.Bind(
+			"Helicopter Extraction Settings",
+			"Helicopter wait time",
+			30,
+			new ConfigDescription("Helicopter wait time on extraction location (seconds)",
+				new AcceptableValueRange<int>(10, 300)));
+		HelicopterExtractTime = Config.Bind(
+			"Helicopter Extraction Settings",
+			"Extraction time",
+			10f,
+			new ConfigDescription("How long you will need to stay in the exfil zone before extraction (seconds)",
+				new AcceptableValueRange<float>(1f, 30f)));
+		HelicopterSpeedMultiplier = Config.Bind(
+			"Helicopter Extraction Settings",
+			"Helicopter speed multiplier",
+			1f,
+			new ConfigDescription("How fast the helicopter arrival animation will be played",
+				new AcceptableValueRange<float>(0.8f, 1.5f)));
+		
+		VoiceoverVolume = Config.Bind(
+			"Sound Settings",
+			"Voiceover volume",
+			90,
+			new ConfigDescription("",
+				new AcceptableValueRange<int>(0, 100)));
+	}
 }
