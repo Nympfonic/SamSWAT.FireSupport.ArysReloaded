@@ -131,4 +131,8 @@
       <HintPath>$(SptSharedAssembliesDir)$(SptVersion)\UnityEngine.UIElementsModule.dll</HintPath>
     </Reference>
   </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if not exist &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot; (&#xA;    mkdir &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot;&#xA;)&#xA;&#xA;copy &quot;$(TargetPath)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)\$(TargetFileName)&quot;&#xA;xcopy /y &quot;$(CopyToOutputDir)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot;" />
+  </Target>
 </Project>
