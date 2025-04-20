@@ -4,65 +4,68 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using Object = UnityEngine.Object;
 
-namespace SamSWAT.FireSupport.ArysReloaded.Unity
+namespace SamSWAT.FireSupport.ArysReloaded.Unity;
+
+public static class FireSupportPool
 {
-    public static class FireSupportPool
-    {
-        private static List<A10Behaviour> A10Behaviours = new List<A10Behaviour>();
-        private static List<UH60Behaviour> UH60Behaviours = new List<UH60Behaviour>();
+	private static readonly List<A10Behaviour> s_a10Behaviours = [];
+	private static readonly List<UH60Behaviour> s_uh60Behaviours = [];
+	
+	public static async Task LoadBundlesAndCreatePools()
+	{
+		var a10 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/a10_warthog.bundle")).GetComponent<A10Behaviour>();
+		var uh60 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/uh60_blackhawk.bundle")).GetComponent<UH60Behaviour>();
+		Transform poolTransform = new GameObject("FireSupportPool").transform;
 
-        public static async Task LoadBundlesAndCreatePools()
-        {
-            var a10 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/a10_warthog.bundle")).GetComponent<A10Behaviour>();
-            var uh60 = (await AssetLoader.LoadAssetAsync("assets/content/vehicles/uh60_blackhawk.bundle")).GetComponent<UH60Behaviour>();
-            var poolTransform = new GameObject("FireSupportPool").transform;
+		if (s_a10Behaviours.Count > 0) s_a10Behaviours.Clear();
+		if (s_uh60Behaviours.Count > 0) s_uh60Behaviours.Clear();
 
-            if (A10Behaviours.Count > 0) A10Behaviours.Clear();
-            if (UH60Behaviours.Count > 0) UH60Behaviours.Clear();
+		for (int i = 0; i < 10; i++)
+		{
+			s_a10Behaviours.Add(LoadA10(a10, poolTransform));
+			s_uh60Behaviours.Add(LoadUH60(uh60, poolTransform));
+		}
+	}
+	
+	private static A10Behaviour LoadA10(A10Behaviour resource, Transform parent)
+	{
+		A10Behaviour instance = Object.Instantiate(resource, parent);
+		instance.gameObject.SetActive(false);
+		return instance;
+	}
+	
+	private static UH60Behaviour LoadUH60(UH60Behaviour resource, Transform parent)
+	{
+		UH60Behaviour instance = Object.Instantiate(resource, parent);
+		instance.gameObject.SetActive(false);
+		AudioMixerGroup outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
+		instance.engineCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		instance.engineDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		instance.rotorsCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		instance.rotorsDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		return instance;
+	}
 
-            for (int i = 0; i < 10; i++)
-            {
-                A10Behaviours.Add(LoadA10(a10, poolTransform));
-                UH60Behaviours.Add(LoadUH60(uh60, poolTransform));
-            }
-        }
-
-        private static A10Behaviour LoadA10(A10Behaviour resource, Transform parent)
-        {
-            var instance = Object.Instantiate(resource, parent);
-            instance.gameObject.SetActive(false);
-            return instance;
-        }
-
-        private static UH60Behaviour LoadUH60(UH60Behaviour resource, Transform parent)
-        {
-            var instance = Object.Instantiate(resource, parent);
-            instance.gameObject.SetActive(false);
-            var outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
-            instance.engineCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            instance.engineDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            instance.rotorsCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            instance.rotorsDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
-            return instance;
-        }
-
-        public static IFireSupportOption TakeFromPool(ESupportType supportType)
-        {
-            switch (supportType)
-            {
-                case ESupportType.Strafe:
-                    var a10 = A10Behaviours.Find(x => x.gameObject.activeSelf == false);
-                    a10.gameObject.SetActive(true);
-                    return a10;
-                case ESupportType.Extract:
-                    var uh60 = UH60Behaviours.Find(x => x.gameObject.activeSelf == false);
-                    uh60.gameObject.SetActive(true);
-                    return uh60;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(supportType), supportType, null);
-            }
-        }
-    }
+	public static IFireSupportOption TakeFromPool(ESupportType supportType)
+	{
+		MonoBehaviour behaviour;
+		
+		switch (supportType)
+		{
+			case ESupportType.Strafe:
+				behaviour = s_a10Behaviours.Find(x => x.gameObject.activeSelf == false);
+				break;
+			case ESupportType.Extract:
+				behaviour = s_uh60Behaviours.Find(x => x.gameObject.activeSelf == false);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(supportType), supportType, null);
+		}
+		
+		behaviour.gameObject.SetActive(true);
+		return (IFireSupportOption)behaviour;
+	}
 }
