@@ -4,85 +4,90 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace SamSWAT.FireSupport.ArysReloaded.Utils
+namespace SamSWAT.FireSupport.ArysReloaded.Utils;
+
+internal static class AssetLoader
 {
-	internal static class AssetLoader
+	private static readonly Dictionary<string, AssetBundle> s_loadedBundles = new();
+	
+	private static async Task<AssetBundle> LoadBundleAsync(string bundleName)
 	{
-	    private static readonly Dictionary<string, AssetBundle> LoadedBundles = new Dictionary<string, AssetBundle>();
-
-	    private static async Task<AssetBundle> LoadBundleAsync(string bundleName)
+		string bundlePath = bundleName;
+		bundleName = Regex.Match(bundleName, @"[^//]*$").Value;
+		
+		if (s_loadedBundles.TryGetValue(bundleName, out AssetBundle bundle))
 		{
-			string bundlePath = bundleName;
-			bundleName = Regex.Match(bundleName, @"[^//]*$").Value;
-
-			if (LoadedBundles.TryGetValue(bundleName, out var bundle))
-				return bundle;
-
-			var bundleRequest = AssetBundle.LoadFromFileAsync(FireSupportPlugin.Directory + bundlePath);
-
-			while (!bundleRequest.isDone)
-				await Task.Yield();
-
-			var requestedBundle = bundleRequest.assetBundle;
-
-			if (requestedBundle != null)
-			{
-				LoadedBundles.Add(bundleName, requestedBundle);
-				return requestedBundle;
-			}
-
-			FireSupportPlugin.LogSource.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
+			return bundle;
+		}
+		
+		AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(FireSupportPlugin.Directory + bundlePath);
+		
+		while (!bundleRequest.isDone)
+		{
+			await Task.Yield();
+		}
+		
+		AssetBundle requestedBundle = bundleRequest.assetBundle;
+		
+		if (requestedBundle != null)
+		{
+			s_loadedBundles.Add(bundleName, requestedBundle);
+			return requestedBundle;
+		}
+		
+		FireSupportPlugin.LogSource.LogError($"Can't load bundle: {bundlePath} (does it exist?), unknown error.");
+		return null;
+	}
+	
+	public static Task<GameObject> LoadAssetAsync(string bundle, string assetName = null)
+	{
+		return LoadAssetAsync<GameObject>(bundle, assetName);
+	}
+	
+	public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
+	{
+		AssetBundle ab = await LoadBundleAsync(bundle);
+		
+		AssetBundleRequest assetBundleRequest = string.IsNullOrEmpty(assetName)
+			? ab.LoadAllAssetsAsync<T>()
+			: ab.LoadAssetAsync<T>(assetName);
+		
+		while (!assetBundleRequest.isDone)
+		{
+			await Task.Yield();
+		}
+		
+		if (assetBundleRequest.allAssets.Length == 0)
+		{
+			FireSupportPlugin.LogSource.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
 			return null;
 		}
-
-	    public static Task<GameObject> LoadAssetAsync(string bundle, string assetName = null)
-	    {
-		    return LoadAssetAsync<GameObject>(bundle, assetName);
-	    }
-	    
-		public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
+		
+		var requestedObj = assetBundleRequest.allAssets[0] as T;
+		
+		return requestedObj;
+	}
+	
+	public static void UnloadBundle(string bundleName, bool unloadAllLoadedObjects = true)
+	{
+		if (s_loadedBundles.TryGetValue(bundleName, out AssetBundle ab))
 		{
-			var ab = await LoadBundleAsync(bundle);
-
-			var assetBundleRequest = string.IsNullOrEmpty(assetName)
-				? ab.LoadAllAssetsAsync<T>()
-				: ab.LoadAssetAsync<T>(assetName);
-
-			while (!assetBundleRequest.isDone)
-				await Task.Yield();
-
-			if (assetBundleRequest.allAssets.Length == 0)
-			{
-				FireSupportPlugin.LogSource.LogError($"Can't load Object from bundle: {bundle}, asset list is empty.");
-				return null;
-			}
-			
-			var requestedObj = assetBundleRequest.allAssets[0] as T;
-
-			return requestedObj;
+			ab.Unload(unloadAllLoadedObjects);
+			s_loadedBundles.Remove(bundleName);
 		}
-
-		public static void UnloadBundle(string bundleName, bool unloadAllLoadedObjects = true)
-        {
-			if (LoadedBundles.TryGetValue(bundleName, out var ab))
-            {
-				ab.Unload(unloadAllLoadedObjects);
-				LoadedBundles.Remove(bundleName);
-            }
-			else
-			{
-				FireSupportPlugin.LogSource.LogError($"AssetBundle '{bundleName}' already unloaded");
-			}
-		}
-
-		public static void UnloadAllBundles()
+		else
 		{
-			foreach (var bundle in LoadedBundles.Values)
-			{
-				bundle.Unload(true);
-            }
-
-            LoadedBundles.Clear();
-        }
+			FireSupportPlugin.LogSource.LogError($"AssetBundle '{bundleName}' already unloaded");
+		}
+	}
+	
+	public static void UnloadAllBundles()
+	{
+		foreach (AssetBundle bundle in s_loadedBundles.Values)
+		{
+			bundle.Unload(true);
+		}
+		
+		s_loadedBundles.Clear();
 	}
 }
