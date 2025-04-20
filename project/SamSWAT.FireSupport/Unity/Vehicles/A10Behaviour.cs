@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class A10Behaviour : MonoBehaviour, IComponent, IFireSupportOption
+public class A10Behaviour : ComponentBase, IFireSupportOption
 {
 	public AudioSource engineSource;
 	public AudioClip[] engineSounds;
@@ -32,10 +32,12 @@ public class A10Behaviour : MonoBehaviour, IComponent, IFireSupportOption
 		StartCoroutine(FlySequence(position));
 	}
 	
-	public void ManualUpdate()
+	public override void ManualUpdate()
 	{
-		if (!gameObject.activeSelf) return;
-		if (_flareCountermeasureInstance == null) return;
+		if (!gameObject.activeSelf || _flareCountermeasureInstance == null)
+		{
+			return;
+		}
 		
 		Transform t = transform;
 		_flareCountermeasureInstance.transform.position = t.position - t.forward * 6.5f;
@@ -52,13 +54,15 @@ public class A10Behaviour : MonoBehaviour, IComponent, IFireSupportOption
 	{
 		_betterAudio = Singleton<BetterAudio>.Instance;
 		_player = Singleton<GameWorld>.Instance.MainPlayer;
-		string playerProfileId = _player.ProfileId;
-		_weapon = new VehicleWeapon(playerProfileId, ItemConstants.GAU8_WEAPON_TPL, ItemConstants.GAU8_AMMO_TPL);
-		
+		_weapon = new VehicleWeapon(_player.ProfileId, ItemConstants.GAU8_WEAPON_TPL, ItemConstants.GAU8_AMMO_TPL);
+	}
+	
+	private void OnEnable()
+	{
 		FireSupportPlugin.RegisterComponent(this);
 	}
 	
-	private void OnDestroy()
+	private void OnDisable()
 	{
 		FireSupportPlugin.DeregisterComponent(this);
 	}
