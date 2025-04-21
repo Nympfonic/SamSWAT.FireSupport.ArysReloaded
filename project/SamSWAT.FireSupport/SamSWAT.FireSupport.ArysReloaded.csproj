@@ -136,6 +136,9 @@
     <Reference Include="UnityEngine.UIElementsModule">
       <HintPath>$(SptSharedAssembliesDir)$(SptVersion)\UnityEngine.UIElementsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityToolkit">
+      <HintPath>$(SptBepInExPluginsDir)UnityToolkit\UnityToolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
