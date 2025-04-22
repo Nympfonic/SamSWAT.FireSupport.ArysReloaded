@@ -146,6 +146,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot; (&#xA;    mkdir &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot;&#xA;)&#xA;&#xA;copy &quot;$(TargetPath)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)\$(TargetFileName)&quot;&#xA;xcopy /y &quot;$(CopyToOutputDir)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot;" />
+    <Exec Command="if not exist &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot; (&#xA;    mkdir &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot;&#xA;)&#xA;&#xA;copy &quot;$(TargetPath)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)\$(TargetFileName)&quot;&#xA;(robocopy &quot;$(CopyToOutputDir)&quot; &quot;$(SptBepInExPluginsDir)$(ProjectName)&quot; /E /XF .gitkeep) ^&amp; if %ERRORLEVEL% leq 3 exit 0" />
   </Target>
 </Project>
