@@ -76,6 +76,7 @@
     <OutputPath>build\SPT-3.11\</OutputPath>
     <TargetFramework>netstandard2.1</TargetFramework>
     <SptVersion>311x</SptVersion>
+    <NoWarn>1701;1702;0649</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
