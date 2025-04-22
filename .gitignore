@@ -366,4 +366,5 @@ MigrationBackup/
 /httpRequests/
 
 **/.idea/
+**/build/
 *.bundle
