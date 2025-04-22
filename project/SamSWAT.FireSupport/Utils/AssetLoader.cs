@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,7 +10,7 @@ internal static class AssetLoader
 {
 	private static readonly Dictionary<string, AssetBundle> s_loadedBundles = new();
 	
-	private static async Task<AssetBundle> LoadBundleAsync(string bundleName)
+	private static async UniTask<AssetBundle> LoadBundleAsync(string bundleName)
 	{
 		string bundlePath = bundleName;
 		bundleName = Regex.Match(bundleName, @"[^//]*$").Value;
@@ -24,7 +24,7 @@ internal static class AssetLoader
 		
 		while (!bundleRequest.isDone)
 		{
-			await Task.Yield();
+			await UniTask.Yield();
 		}
 		
 		AssetBundle requestedBundle = bundleRequest.assetBundle;
@@ -39,12 +39,12 @@ internal static class AssetLoader
 		return null;
 	}
 	
-	public static Task<GameObject> LoadAssetAsync(string bundle, string assetName = null)
+	public static UniTask<GameObject> LoadAssetAsync(string bundle, string assetName = null)
 	{
 		return LoadAssetAsync<GameObject>(bundle, assetName);
 	}
 	
-	public static async Task<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
+	public static async UniTask<T> LoadAssetAsync<T>(string bundle, string assetName = null) where T : Object
 	{
 		AssetBundle ab = await LoadBundleAsync(bundle);
 		
@@ -54,7 +54,7 @@ internal static class AssetLoader
 		
 		while (!assetBundleRequest.isDone)
 		{
-			await Task.Yield();
+			await UniTask.Yield();
 		}
 		
 		if (assetBundleRequest.allAssets.Length == 0)
@@ -81,11 +81,11 @@ internal static class AssetLoader
 		}
 	}
 	
-	public static void UnloadAllBundles()
+	public static void UnloadAllBundles(bool unloadAllLoadedObjects = true)
 	{
 		foreach (AssetBundle bundle in s_loadedBundles.Values)
 		{
-			bundle.Unload(true);
+			bundle.Unload(unloadAllLoadedObjects);
 		}
 		
 		s_loadedBundles.Clear();
