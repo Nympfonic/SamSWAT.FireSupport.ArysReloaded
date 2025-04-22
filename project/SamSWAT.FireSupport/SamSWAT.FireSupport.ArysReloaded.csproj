@@ -139,6 +139,9 @@
     <Reference Include="UnityToolkit">
       <HintPath>$(SptBepInExPluginsDir)UnityToolkit\UnityToolkit.dll</HintPath>
     </Reference>
+    <Reference Include="ZString">
+      <HintPath>$(SptBepInExPluginsDir)UnityToolkit\ZString.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
