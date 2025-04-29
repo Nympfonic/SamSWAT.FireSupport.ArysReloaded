@@ -1,7 +1,7 @@
 {
     "_id": "660b2d05cec10101410e7d7b",
     "_name": "weapon_ge_gau8_avenger_30x173",
-    "_parent": "5447bed64bdc2d97278b4568",
+    "_parent": "5447bedf4bdc2d87278b4568",
     "_props": {
         "AdjustCollimatorsToTrajectory": false,
         "AimPlane": 0.19,
@@ -20,8 +20,8 @@
         "CameraSnap": 8,
         "CanPutIntoDuringTheRaid": true,
         "CanQueueSecondShot": true,
-        "CanRequireOnRagfair": true,
-        "CanSellOnRagfair": true,
+        "CanRequireOnRagfair": false,
+        "CanSellOnRagfair": false,
         "CantRemoveFromSlotsDuringRaid": [],
         "CenterOfImpact": 1,
         "Chambers": [
@@ -48,7 +48,7 @@
         "Convergence": 1.7,
         "CoolFactorGun": 1,
         "CoolFactorGunMods": 1,
-        "Description": "weapon_zid_ags30_30x29\n",
+        "Description": "weapon_ge_gau8_avenger_30x173",
         "DeviationCurve": 1,
         "DeviationMax": 100,
         "DiscardLimit": -1,
@@ -100,7 +100,7 @@
         "MinRepairKitDegradation": 0,
         "MustBoltBeOpennedForExternalReload": false,
         "MustBoltBeOpennedForInternalReload": false,
-        "Name": "weapon_zid_ags30_30x29",
+        "Name": "weapon_ge_gau8_avenger_30x173",
         "NoFiremodeOnBoltcatch": false,
         "NotShownInSlot": false,
         "OperatingResource": 5000,
@@ -137,16 +137,16 @@
             "y": 0,
             "z": 0
         },
-        "ShortName": "weapon_zid_ags30_30x29",
+        "ShortName": "weapon_ge_gau8_avenger_30x173",
         "SightingRange": 100,
-        "SingleFireRate": 425,
+        "SingleFireRate": 1395,
         "SizeReduceRight": 0,
         "Slots": [
             {
                 "_id": "5d52cc5ba4b9367408500065",
                 "_mergeSlotWithChildren": false,
                 "_name": "mod_magazine",
-                "_parent": "5d52cc5ba4b9367408500062",
+                "_parent": "660b2d05cec10101410e7d7b",
                 "_props": {
                     "filters": [
                         {
@@ -164,7 +164,7 @@
                 "_id": "5d53fdd4a4b93652177610c7",
                 "_mergeSlotWithChildren": false,
                 "_name": "mod_scope",
-                "_parent": "5d52cc5ba4b9367408500062",
+                "_parent": "660b2d05cec10101410e7d7b",
                 "_props": {
                     "filters": [
                         {
@@ -197,12 +197,13 @@
         "Velocity": 0,
         "Weight": 0.1,
         "Width": 2,
+        "WithAnimatorAiming": false,
         "ammoCaliber": "Caliber30x29",
         "bEffDist": 650,
-        "bFirerate": 425,
+        "bFirerate": 1395,
         "bHearDist": 80,
         "chamberAmmoCount": 1,
-        "defAmmo": "5d70e500a4b9364de70d38ce",
+        "defAmmo": "660b2d05cec10101410e7d7a",
         "defMagType": "5d52d479a4b936793d58c76b",
         "durabSpawnMax": 75,
         "durabSpawnMin": 25,
