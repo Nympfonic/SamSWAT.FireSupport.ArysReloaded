@@ -365,6 +365,7 @@ MigrationBackup/
 # Editor-based HTTP Client requests
 /httpRequests/
 
+/WIP/
 **/.idea/
 **/build/
 *.bundle
