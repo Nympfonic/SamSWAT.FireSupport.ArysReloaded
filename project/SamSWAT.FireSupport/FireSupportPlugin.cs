@@ -14,7 +14,7 @@ namespace SamSWAT.FireSupport.ArysReloaded;
 [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT's FireSupport: Arys Reloaded", "2.3.0")]
 public class FireSupportPlugin : BaseUnityPlugin
 {
-	private readonly List<ComponentBase> _componentsToUpdate = [];
+	private readonly List<UpdatableComponentBase> _componentsToUpdate = [];
 	
 	public static FireSupportPlugin Instance { get; private set; }
 	
@@ -29,16 +29,6 @@ public class FireSupportPlugin : BaseUnityPlugin
 	internal static ConfigEntry<float> HelicopterSpeedMultiplier { get; private set; }
 	internal static ConfigEntry<int> RequestCooldown { get; private set; }
 	internal static ConfigEntry<int> VoiceoverVolume { get; private set; }
-	
-	public static void RegisterComponent(ComponentBase component)
-	{
-		Instance._componentsToUpdate.Add(component);
-	}
-	
-	public static void DeregisterComponent(ComponentBase component)
-	{
-		component.MarkForRemoval();
-	}
 	
 	private void Awake()
 	{
@@ -56,17 +46,12 @@ public class FireSupportPlugin : BaseUnityPlugin
 	
 	private void Update()
 	{
-		if (_componentsToUpdate.Count == 0)
-		{
-			return;
-		}
-		
-		_componentsToUpdate.RemoveAll(x => x.IsMarkedForRemoval());
-		
-		for (int i = _componentsToUpdate.Count - 1; i >= 0; i--)
-		{
-			_componentsToUpdate[i].ManualUpdate();
-		}
+		UpdateComponents();
+	}
+	
+	public void RegisterComponent(UpdatableComponentBase component)
+	{
+		_componentsToUpdate.Add(component);
 	}
 	
 	private void InitializeConfigBindings()
@@ -121,5 +106,28 @@ public class FireSupportPlugin : BaseUnityPlugin
 			90,
 			new ConfigDescription("",
 				new AcceptableValueRange<int>(0, 100)));
+	}
+	
+	private void UpdateComponents()
+	{
+		if (_componentsToUpdate.Count == 0)
+		{
+			return;
+		}
+		
+		_componentsToUpdate.RemoveAll(x => x.IsMarkedForRemoval());
+
+		int count = _componentsToUpdate.Count;
+		for (var i = 0; i < count; i++)
+		{
+			UpdatableComponentBase component = _componentsToUpdate[i];
+			
+			if (component.IsMarkedForRemoval() || !component.HasFinishedInitialization)
+			{
+				continue;
+			}
+			
+			component.ManualUpdate();
+		}
 	}
 }

@@ -1,40 +1,54 @@
 ﻿using Comfort.Common;
+using Cysharp.Threading.Tasks;
 using EFT;
-using System.Collections;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Threading;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class A10Behaviour : ComponentBase, IFireSupportOption
+public sealed class A10Behaviour : FireSupportBehaviour
 {
 	public AudioSource engineSource;
 	public AudioClip[] engineSounds;
+	
 	[SerializeField] private AudioClip[] gau8Sound;
 	[SerializeField] private AudioClip[] gau8ExpSounds;
 	[SerializeField] private Transform gau8Transform;
 	[SerializeField] private GameObject gau8Particles;
 	[SerializeField] private GameObject flareCountermeasure;
+	
 	private GameObject _flareCountermeasureInstance;
 	
 	private BetterAudio _betterAudio;
+	private FireSupportAudio _fireSupportAudio;
 	
 	private VehicleWeapon _weapon;
 	private Player _player;
 	
-	public void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation)
+	public override ESupportType SupportType => ESupportType.Strafe;
+	
+	public override void ProcessRequest(
+		Vector3 position,
+		Vector3 direction,
+		Vector3 rotation,
+		CancellationToken cancellationToken)
 	{
-		Vector3 a10StartPos = position + direction * 2650 + 320 * Vector3.up;
+		Vector3 a10StartPos = position + 2650 * direction + 320 * Vector3.up;
 		Vector3 a10Heading = position - a10StartPos;
+		
 		float a10YAngle = Mathf.Atan2(a10Heading.x, a10Heading.z) * Mathf.Rad2Deg;
-		transform.SetPositionAndRotation(a10StartPos, Quaternion.Euler(0, a10YAngle, 0));
+		Quaternion a10Rotation = Quaternion.Euler(0, a10YAngle, 0);
+		
+		transform.SetPositionAndRotation(a10StartPos, a10Rotation);
 		_flareCountermeasureInstance = Instantiate(flareCountermeasure, null);
-		StartCoroutine(FlySequence(position));
+		FlySequence(position, cancellationToken).Forget();
 	}
 	
 	public override void ManualUpdate()
 	{
-		if (!gameObject.activeSelf || _flareCountermeasureInstance == null)
+		if (_flareCountermeasureInstance == null)
 		{
 			return;
 		}
@@ -45,59 +59,48 @@ public class A10Behaviour : ComponentBase, IFireSupportOption
 		transform.Translate(0, 0, 148 * Time.deltaTime, Space.Self);
 	}
 	
-	public void ReturnToPool()
+	protected override void OnAwake()
 	{
-		gameObject.SetActive(false);
-	}
-	
-	private void Start()
-	{
+		_fireSupportAudio = FireSupportAudio.Instance;
 		_betterAudio = Singleton<BetterAudio>.Instance;
 		_player = Singleton<GameWorld>.Instance.MainPlayer;
 		_weapon = new VehicleWeapon(_player.ProfileId, ItemConstants.GAU8_WEAPON_TPL, ItemConstants.GAU8_AMMO_TPL);
-	}
-	
-	private void OnEnable()
-	{
-		FireSupportPlugin.RegisterComponent(this);
-	}
-	
-	private void OnDisable()
-	{
-		FireSupportPlugin.DeregisterComponent(this);
-	}
-	
-	//My main motto for next 2 methods is: if it works - it works (ツ)
-	private IEnumerator FlySequence(Vector3 strafePos)
-	{
-		var fireSupportAudio = FireSupportAudio.Instance;
 		
-		yield return new WaitForSeconds(3f);
+		HasFinishedInitialization = true;
+	}
+	
+	// My main motto for the next 2 methods is: if it works - it works (ツ)
+	private async UniTaskVoid FlySequence(Vector3 strafePos, CancellationToken cancellationToken)
+	{
+		await UniTask.WaitForSeconds(3f, cancellationToken: cancellationToken);
 		
-		engineSource.clip = engineSounds[Random.Range(0, engineSounds.Length)];
+		// Play engine sound
+		engineSource.clip = GetRandomClip(engineSounds);
 		engineSource.outputAudioMixerGroup = _betterAudio.OutEnvironment;
 		engineSource.Play();
+		await UniTask.WaitForSeconds(1f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(1f);
-		
+		// Disable flares
 		_flareCountermeasureInstance.SetActive(false);
+		await UniTask.WaitForSeconds(3f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(3f);
-		
+		// Enable gun particles
 		gau8Particles.SetActive(true);
-		fireSupportAudio.PlayVoiceover(EVoiceoverType.JetFiring);
+		// Play jet firing voiceover
+		_fireSupportAudio.PlayVoiceover(EVoiceoverType.JetFiring);
+		await UniTask.WaitForSeconds(1f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(1f);
+		// Fire GAU8
+		Gau8Sequence(strafePos, cancellationToken).Forget();
+		await UniTask.WaitForSeconds(2f, cancellationToken: cancellationToken);
 		
-		StartCoroutine(Gau8Sequence(strafePos));
-		
-		yield return new WaitForSeconds(2f);
-		
-		if (_player == null || !_player.ActiveHealthController.IsAlive)
+		if (!PlayerHelper.IsMainPlayerAlive())
 		{
-			yield break;
+			return;
 		}
 		
+		// Play explosion sfx
+		// TODO: This should be the sfx for the actual projectile instead of manually being played here
 		_betterAudio.PlayAtPoint(
 			strafePos,
 			GetRandomClip(gau8ExpSounds),
@@ -108,14 +111,14 @@ public class A10Behaviour : ComponentBase, IFireSupportOption
 			EOcclusionTest.Regular
 		);
 		gau8Particles.SetActive(false);
+		await UniTask.WaitForSeconds(3.5f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(3.5f);
-		
-		if (_player == null || !_player.ActiveHealthController.IsAlive)
+		if (!PlayerHelper.IsMainPlayerAlive())
 		{
-			yield break;
+			return;
 		}
 		
+		// Play GAU8 BRRRT sfx
 		_betterAudio.PlayAtPoint(
 			gau8Transform.position - gau8Transform.forward * 100 - gau8Transform.up * 100,
 			GetRandomClip(gau8Sound),
@@ -124,27 +127,25 @@ public class A10Behaviour : ComponentBase, IFireSupportOption
 			3200,
 			2
 		);
+		await UniTask.WaitForSeconds(1.5f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(1.5f);
-		
+		// Enable flares
 		_flareCountermeasureInstance.SetActive(true);
+		await UniTask.WaitForSeconds(8f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(8f);
+		// Play jet leaving voiceover
+		_fireSupportAudio.PlayVoiceover(EVoiceoverType.JetLeaving);
+		await UniTask.WaitForSeconds(4f, cancellationToken: cancellationToken);
 		
-		FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.JetLeaving);
+		// Play strafe over voiceover
+		_fireSupportAudio.PlayVoiceover(EVoiceoverType.StationStrafeEnd);
+		await UniTask.WaitForSeconds(4f, cancellationToken: cancellationToken);
 		
-		yield return new WaitForSeconds(4f);
-		
-		FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationStrafeEnd);
-		
-		yield return new WaitForSeconds(4f);
 		ReturnToPool();
 	}
 	
-	private IEnumerator Gau8Sequence(Vector3 strafePos)
+	private async UniTaskVoid Gau8Sequence(Vector3 strafePos, CancellationToken cancellationToken)
 	{
-		Player player = Singleton<GameWorld>.Instance.MainPlayer;
-		
 		Vector3 gau8Pos = gau8Transform.position + gau8Transform.forward * 515;
 		Vector3 gau8Dir = Vector3.Normalize(strafePos - gau8Pos);
 		Vector3 gau8LeftDir = Vector3.Cross(gau8Dir, Vector3.up).normalized;
@@ -152,9 +153,9 @@ public class A10Behaviour : ComponentBase, IFireSupportOption
 		var ammoCounter = 50;
 		while (ammoCounter > 0)
 		{
-			if (player == null || !player.ActiveHealthController.IsAlive)
+			if (!PlayerHelper.IsMainPlayerAlive())
 			{
-				yield break;
+				break;
 			}
 			
 			Vector3 leftRightSpread = gau8LeftDir * Random.Range(-0.007f, 0.007f);
@@ -162,14 +163,14 @@ public class A10Behaviour : ComponentBase, IFireSupportOption
 			Vector3 projectileDir = Vector3.Normalize(gau8Dir + leftRightSpread);
 			
 			_weapon.FireProjectile(gau8Pos, projectileDir);
-			
 			ammoCounter--;
-			yield return new WaitForSeconds(0.043f);
+			await UniTask.WaitForSeconds(_weapon.timeBetweenShots, cancellationToken: cancellationToken);
 		}
 	}
 	
-	private AudioClip GetRandomClip(AudioClip[] audioClips)
+	private static AudioClip GetRandomClip(AudioClip[] audioClips)
 	{
-		return audioClips[Random.Range(0, audioClips.Length)];
+		int randomIndex = Random.Range(0, audioClips.Length);
+		return audioClips[randomIndex];
 	}
 }

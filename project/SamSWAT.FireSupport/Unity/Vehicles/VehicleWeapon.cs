@@ -15,6 +15,9 @@ public class VehicleWeapon
 	private readonly Weapon _weapon;
 	private readonly AmmoItemClass _ammoItem;
 	
+	public readonly int fireRate;
+	public readonly float timeBetweenShots;
+	
 	public VehicleWeapon(string playerProfileId, string weaponTpl, string ammoTpl)
 	{
 		GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -30,6 +33,8 @@ public class VehicleWeapon
 		
 		_weapon = (Weapon)itemFactory.CreateItem(MongoID.Generate(), weaponTpl, null);
 		_ammoItem = (AmmoItemClass)itemFactory.CreateItem(MongoID.Generate(), ammoTpl, null);
+		fireRate = _weapon.FireRate;
+		timeBetweenShots = 1f / (fireRate / 60f);
 	}
 	
 	public void FireProjectile(Vector3 origin, Vector3 direction)

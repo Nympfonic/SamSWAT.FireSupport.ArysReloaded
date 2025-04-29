@@ -1,113 +1,101 @@
-﻿using EFT;
+﻿using Cysharp.Text;
+using Cysharp.Threading.Tasks;
 using EFT.InputSystem;
 using EFT.UI;
 using EFT.UI.Gestures;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
-using System.Collections;
-using System.Threading.Tasks;
+using System;
+using System.Threading;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
+/// <summary>
+/// Entry point for Fire Support in-raid logic.
+/// </summary>
 public class FireSupportController : UIInputNode
 {
-	private bool _requestAvailable = true;
-	private Coroutine _timerCoroutine;
-	private FireSupportAudio _audio;
-	private FireSupportUI _ui;
-	private FireSupportSpotter _spotter;
-	private GesturesMenu _gesturesMenu;
+	[NonSerialized] private CancellationTokenSource _cancellationTokenSource;
+	[NonSerialized] private FireSupportAudio _audio;
+	[NonSerialized] private FireSupportUI _ui;
+	[NonSerialized] private FireSupportSpotter _spotter;
+	[NonSerialized] private GesturesMenu _gesturesMenu;
+	
+	[NonSerialized] private readonly FireSupportServiceMappings _services = new(new SupportTypeComparer());
 	
 	public static FireSupportController Instance { get; private set; }
-	public bool StrafeRequestAvailable => _requestAvailable && AvailableStrafeRequests > 0;
-	public bool ExtractRequestAvailable => _requestAvailable && AvailableExtractRequests > 0;
-	public bool AnyRequestAvailable => _requestAvailable && (AvailableStrafeRequests > 0 || AvailableExtractRequests > 0);
-	public int AvailableStrafeRequests { get; private set; }
-	public int AvailableExtractRequests { get; private set; }
 	
-	public static async Task<FireSupportController> Init(GesturesMenu gesturesMenu)
+	public static async UniTask<FireSupportController> Create(GesturesMenu gesturesMenu)
 	{
 		Instance = new GameObject("FireSupportController").AddComponent<FireSupportController>();
-		Instance._audio = await FireSupportAudio.Load();
-		Instance._spotter = await FireSupportSpotter.Load();
-		Instance._ui = await FireSupportUI.Load(gesturesMenu);
-		Instance._gesturesMenu = gesturesMenu;
-		await FireSupportPool.LoadBundlesAndCreatePools();
-		//VehicleWeapon.Init();
-		Instance.AvailableStrafeRequests = FireSupportPlugin.AmountOfStrafeRequests.Value;
-		Instance.AvailableExtractRequests = FireSupportPlugin.AmountOfExtractionRequests.Value;
-		Instance._audio.PlayVoiceover(EVoiceoverType.StationReminder);
-		Instance._ui.SupportRequested += Instance.OnSupportRequested;
+		await Instance.Initialize(gesturesMenu);
 		return Instance;
+	}
+	
+	private async UniTask Initialize(GesturesMenu gesturesMenu)
+	{
+		_cancellationTokenSource = new CancellationTokenSource();
+		_gesturesMenu = gesturesMenu;
+		_audio = await FireSupportAudio.Create();
+		_spotter = await FireSupportSpotter.Load();
+		
+		var heliExfil = new HeliExfiltrationService(
+			_spotter,
+			_cancellationTokenSource.Token,
+			FireSupportPlugin.AmountOfExtractionRequests.Value);
+		_services.Add(heliExfil.SupportType, heliExfil);
+		
+		var jetStrafe = new JetStrafeService(
+			_spotter,
+			_cancellationTokenSource.Token,
+			FireSupportPlugin.AmountOfStrafeRequests.Value);
+		_services.Add(jetStrafe.SupportType, jetStrafe);
+		
+		_ui = await FireSupportUI.Load(_services, gesturesMenu);
+		_ui.SupportRequested += OnSupportRequested;
+		
+		await FireSupportPoolManager.Initialize(10);
+		
+		_audio.PlayVoiceover(EVoiceoverType.StationReminder);
 	}
 	
 	private void OnDestroy()
 	{
-		AssetLoader.UnloadAllBundles();
 		_ui.SupportRequested -= OnSupportRequested;
-		StaticManager.KillCoroutine(ref _timerCoroutine);
+		_cancellationTokenSource.Cancel();
+		_cancellationTokenSource.Dispose();
+		AssetLoader.UnloadAllBundles();
 	}
 	
 	private void OnSupportRequested(ESupportType supportType)
 	{
-		switch (supportType)
+		try
 		{
-			case ESupportType.Strafe:
-				if (StrafeRequestAvailable)
-				{
-					_gesturesMenu.Close();
-					StaticManager.BeginCoroutine(_spotter.SpotterSequence(ESupportType.Strafe, (b, startPos, endPos) =>
-					{
-						if (!b)
-							StaticManager.BeginCoroutine(StrafeRequest(startPos, endPos));
-					}));
-				}
-				break;
-			case ESupportType.Extract:
-				if (ExtractRequestAvailable)
-				{
-					_gesturesMenu.Close();
-					StaticManager.BeginCoroutine(_spotter.SpotterSequence(ESupportType.Extract, (b, pos, rot) =>
-					{
-						if (!b)
-							StaticManager.BeginCoroutine(ExtractionRequest(pos, rot));
-					}));
-				}
-				break;
+			if (!_services.TryGetValue(supportType, out IFireSupportService service))
+			{
+				throw new ArgumentException($"No service registered for support type {supportType}");
+			}
+			
+			if (!service.IsRequestAvailable())
+			{
+				FireSupportPlugin.LogSource.LogWarning("Should not be able to reach this line, bad logic somewhere...");
+				return;
+			}
+			
+			_gesturesMenu.Close();
+			service.PlanRequest().Forget();
+		}
+		catch (OperationCanceledException) {}
+		catch (Exception ex)
+		{
+			FireSupportPlugin.LogSource.LogError(ex);
 		}
 	}
 	
-	private IEnumerator StrafeRequest(Vector3 strafeStartPos, Vector3 strafeEndPos)
+	public async UniTaskVoid StartCooldown(float time, CancellationToken cancellationToken, Action callback = null)
 	{
-		IFireSupportOption a10 = FireSupportPool.TakeFromPool(ESupportType.Strafe);
-		Vector3 pos = (strafeStartPos + strafeEndPos) / 2;
-		Vector3 dir = (strafeEndPos - strafeStartPos).normalized;
-		AvailableStrafeRequests--;
-		_timerCoroutine = StaticManager.BeginCoroutine(Timer(FireSupportPlugin.RequestCooldown.Value));
-		_audio.PlayVoiceover(EVoiceoverType.StationStrafeRequest);
-		yield return new WaitForSeconds(8f);
-		_audio.PlayVoiceover(EVoiceoverType.JetArriving);
-		a10.ProcessRequest(pos, dir, Vector3.zero);
-	}
-	
-	private IEnumerator ExtractionRequest(Vector3 position, Vector3 rotation)
-	{
-		IFireSupportOption uh60 = FireSupportPool.TakeFromPool(ESupportType.Extract);
-		AvailableExtractRequests--;
-		_requestAvailable = false;
-		_audio.PlayVoiceover(EVoiceoverType.StationExtractionRequest);
-		yield return new WaitForSeconds(8f);
-		uh60.ProcessRequest(position, Vector3.zero, rotation);
-		_audio.PlayVoiceover(EVoiceoverType.SupportHeliArrivingToPickup);
-		yield return new WaitForSeconds(35f + FireSupportPlugin.HelicopterWaitTime.Value);
-		if (Instance == null) yield break;
-		_timerCoroutine = StaticManager.BeginCoroutine(Timer(FireSupportPlugin.RequestCooldown.Value));
-	}
-	
-	private IEnumerator Timer(float time)
-	{
-		_requestAvailable = false;
 		_ui.timerText.enabled = true;
+		
 		while (time > 0)
 		{
 			time -= Time.deltaTime;
@@ -115,18 +103,27 @@ public class FireSupportController : UIInputNode
 			{
 				time = 0;
 			}
-
+			
 			float minutes = Mathf.FloorToInt(time / 60);
 			float seconds = Mathf.FloorToInt(time % 60);
-			_ui.timerText.text = $"{minutes:00}.{seconds:00}";
-			yield return null;
+			
+			using (Utf16ValueStringBuilder sb = ZString.CreateStringBuilder())
+			{
+				sb.AppendFormat("{0:00}.{1:00}", minutes, seconds);
+				_ui.timerText.text = sb.ToString();
+			}
+			
+			await UniTask.NextFrame(cancellationToken);
 		}
+		
 		_ui.timerText.enabled = false;
-		_requestAvailable = true;
-		if (AnyRequestAvailable)
+		
+		if (_services.AnyAvailableRequests())
 		{
 			FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.StationAvailable);
 		}
+		
+		callback?.Invoke();
 	}
 	
 	public override ETranslateResult TranslateCommand(ECommand command)

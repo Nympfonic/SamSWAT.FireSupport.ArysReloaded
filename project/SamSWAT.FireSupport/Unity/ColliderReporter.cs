@@ -2,7 +2,7 @@
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class ColliderReporter : ComponentBase
+public class ColliderReporter : UpdatableComponentBase
 {
 	private bool _hasCollision;
 	private BoxCollider[] _colliders;
@@ -38,20 +38,12 @@ public class ColliderReporter : ComponentBase
 		}
 	}
 	
-	private void Start()
+	protected override void OnAwake()
 	{
 		_intersectedColliders = new Collider[5];
 		_colliders = GetComponents<BoxCollider>();
-		_mask = LayerMask.GetMask("LowPolyCollider", "HighPolyCollider");
-	}
-	
-	private void OnEnable()
-	{
-		FireSupportPlugin.RegisterComponent(this);
-	}
-	
-	private void OnDisable()
-	{
-		FireSupportPlugin.DeregisterComponent(this);
+		_mask = 1 << LayerMask.NameToLayer("LowPolyCollider") | 1 << LayerMask.NameToLayer("HighPolyCollider");
+		
+		HasFinishedInitialization = true;
 	}
 }

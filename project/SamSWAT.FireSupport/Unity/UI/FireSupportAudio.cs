@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
+using Cysharp.Threading.Tasks;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
@@ -26,7 +26,7 @@ public class FireSupportAudio : ScriptableObject
 	
 	public static FireSupportAudio Instance { get; private set; }
 	
-	public static async Task<FireSupportAudio> Load()
+	public static async UniTask<FireSupportAudio> Create()
 	{
 		Instance = await AssetLoader.LoadAssetAsync<FireSupportAudio>("assets/content/ui/firesupport_audio.bundle");
 		return Instance;

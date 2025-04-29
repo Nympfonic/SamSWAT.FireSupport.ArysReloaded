@@ -1,148 +1,145 @@
 ﻿using Comfort.Common;
+using Cysharp.Threading.Tasks;
 using EFT;
 using EFT.UI;
 using EFT.UI.Gestures;
 using SamSWAT.FireSupport.ArysReloaded.Utils;
 using System;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class FireSupportUI : ComponentBase, IPointerEnterHandler, IPointerExitHandler
+public class FireSupportUI : UpdatableComponentBase, IPointerEnterHandler, IPointerExitHandler
 {
 	public GameObject SpotterNotice;
 	public GameObject SpotterHeliNotice;
 	public Text timerText;
+	
 	[SerializeField] private FireSupportUIElement[] supportOptions;
 	[SerializeField] private HoverTooltipArea tooltip;
+	
 	private Player _player;
-	private ESupportType _selectedSupportOption;
 	private float _menuOffset;
 	
+	private FireSupportServiceMappings _services;
+	
+	private bool _isUnderPointer;
+	private readonly Color _enabledColor = new(1, 1, 1, 1);
+	private readonly Color _disabledColor = new(1, 1, 1, 0.4f);
+
 	public static FireSupportUI Instance { get; private set; }
-	public bool IsUnderPointer { get; set; }
 	
 	public event Action<ESupportType> SupportRequested;
 	
-	public static async Task<FireSupportUI> Load(GesturesMenu gesturesMenu)
+	public static async UniTask<FireSupportUI> Load(
+		FireSupportServiceMappings services,
+		GesturesMenu gesturesMenu)
 	{
 		Instance = Instantiate(await AssetLoader.LoadAssetAsync("assets/content/ui/firesupport_ui.bundle")).GetComponent<FireSupportUI>();
-		Instance._player = Singleton<GameWorld>.Instance.MainPlayer;
-		
-		Transform fireSupportUiT = Instance.transform;
-		fireSupportUiT.parent = gesturesMenu.transform;
-		fireSupportUiT.localPosition = new Vector3(0, -255, 0);
-		fireSupportUiT.localScale = new Vector3(1.4f, 1.4f, 1);
-		Instance._menuOffset = Screen.height / 2f - fireSupportUiT.position.y;
-		
-		Transform infoPanelTransform = Instance.SpotterNotice.transform.parent;
-		infoPanelTransform.parent = Singleton<GameUI>.Instance.transform;
-		infoPanelTransform.localPosition = new Vector3(0, -370f, 0);
-		infoPanelTransform.localScale = Vector3.one;
-		
+		Instance.Initialize(services, gesturesMenu);
 		return Instance;
 	}
 	
 	public override void ManualUpdate()
 	{
-		if (!gameObject.activeInHierarchy)
+		bool rangefinderInHands = HasRangefinderEquipped();
+		tooltip.SetUnlockStatus(rangefinderInHands);
+		if (rangefinderInHands)
 		{
-			return;
+			RenderUI();
+			HandleInput();
 		}
-		
-		RenderUI();
-		HandleInput();
-	}
-	
-	private void OnEnable()
-	{
-		FireSupportPlugin.RegisterComponent(this);
-	}
-	
-	private void OnDisable()
-	{
-		FireSupportPlugin.DeregisterComponent(this);
 	}
 	
 	private void RenderUI()
 	{
-		var enabledColor = new Color(1, 1, 1, 1);
-		var disabledColor = new Color(1, 1, 1, 0.4f);
-		bool rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
-		
-		tooltip.SetUnlockStatus(rangefinderInHands);
-		
-		if (!rangefinderInHands)
+		if (_services == null || _services.Count == 0)
 		{
 			return;
 		}
 		
-		var fireSupportController = FireSupportController.Instance;
-		if (fireSupportController.StrafeRequestAvailable)
+		foreach (IFireSupportService service in _services.Values)
 		{
-			supportOptions[2].AmountText.color = enabledColor;
-			supportOptions[2].Icon.color = enabledColor;
+			RenderButton(service);
+		}
+	}
+	
+	private void RenderButton(IFireSupportService service)
+	{
+		FireSupportUIElement uiElement = supportOptions[(int)service.SupportType];
+		
+		if (service.IsRequestAvailable())
+		{
+			uiElement.AmountText.color = _enabledColor;
+			uiElement.Icon.color = _enabledColor;
 		}
 		else
 		{
-			supportOptions[2].IsUnderPointer = false;
-			supportOptions[2].AmountText.color = disabledColor;
-			supportOptions[2].Icon.color = disabledColor;
+			uiElement.IsUnderPointer = false;
+			uiElement.AmountText.color = _disabledColor;
+			uiElement.Icon.color = _disabledColor;
 		}
 		
-		if (fireSupportController.ExtractRequestAvailable)
-		{
-			supportOptions[4].AmountText.color = enabledColor;
-			supportOptions[4].Icon.color = enabledColor;
-		}
-		else
-		{
-			supportOptions[4].IsUnderPointer = false;
-			supportOptions[4].AmountText.color = disabledColor;
-			supportOptions[4].Icon.color = disabledColor;
-		}
-		
-		supportOptions[2].AmountText.text = fireSupportController.AvailableStrafeRequests.ToString();
-		supportOptions[4].AmountText.text = fireSupportController.AvailableExtractRequests.ToString();
+		uiElement.AmountText.text = service.AvailableRequests.ToString();
 	}
 	
 	private void HandleInput()
 	{
-		if (!IsUnderPointer)
-		{
-			return;
-		}
-		
-		bool rangefinderInHands = _player.HandsController.Item.TemplateId == ItemConstants.RANGEFINDER_TPL;
-		if (!rangefinderInHands)
+		if (!_isUnderPointer)
 		{
 			return;
 		}
 		
 		float angle = CalculateAngle();
+		var selectedSupportOption = ESupportType.None;
 		
-		for (int i = 0; i < supportOptions.Length; i++)
+		for (var i = 0; i < supportOptions.Length; i++)
 		{
-			if (angle > i * 45 && angle < (i + 1) * 45 && FireSupportController.Instance.AnyRequestAvailable)
+			FireSupportUIElement uiElement = supportOptions[i];
+			
+			if (_services.AnyAvailableRequests() &&
+				angle > i * 45 &&
+				angle < (i + 1) * 45)
 			{
-				supportOptions[i].IsUnderPointer = true;
-				_selectedSupportOption = (ESupportType)i;
+				uiElement.IsUnderPointer = true;
+				selectedSupportOption = (ESupportType)i;
 			}
 			else
 			{
-				supportOptions[i].IsUnderPointer = false;
+				uiElement.IsUnderPointer = false;
 			}
 		}
 		
-		if (!Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0))
 		{
-			return;
+			SupportRequested?.Invoke(selectedSupportOption);
 		}
+	}
+	
+	private void Initialize(FireSupportServiceMappings services, GesturesMenu gesturesMenu)
+	{
+		_player = Singleton<GameWorld>.Instance.MainPlayer;
+		_services = services;
 		
-		SupportRequested?.Invoke(_selectedSupportOption);
+		Transform fireSupportUiT = transform;
+		fireSupportUiT.parent = gesturesMenu.transform;
+		fireSupportUiT.localPosition = new Vector3(0, -255, 0);
+		fireSupportUiT.localScale = new Vector3(1.4f, 1.4f, 1);
+		_menuOffset = Screen.height / 2f - fireSupportUiT.position.y;
+		
+		Transform infoPanelTransform = SpotterNotice.transform.parent;
+		infoPanelTransform.parent = Singleton<GameUI>.Instance.transform;
+		infoPanelTransform.localPosition = new Vector3(0, -370f, 0);
+		infoPanelTransform.localScale = Vector3.one;
+		
+		HasFinishedInitialization = true;
+	}
+	
+	private bool HasRangefinderEquipped()
+	{
+		return _player.HandsController.Item?.TemplateId == ItemConstants.RANGEFINDER_TPL;
 	}
 	
 	private float CalculateAngle()
@@ -171,16 +168,16 @@ public class FireSupportUI : ComponentBase, IPointerEnterHandler, IPointerExitHa
 	
 	void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
 	{
-		IsUnderPointer = true;
+		_isUnderPointer = true;
 	}
 	
 	void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
 	{
-		IsUnderPointer = false;
+		_isUnderPointer = false;
 		
-		foreach (FireSupportUIElement t in supportOptions)
+		foreach (FireSupportUIElement uiElement in supportOptions)
 		{
-			t.IsUnderPointer = false;
+			uiElement.IsUnderPointer = false;
 		}
 	}
 }

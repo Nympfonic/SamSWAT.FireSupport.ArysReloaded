@@ -1,12 +1,15 @@
 ﻿using Comfort.Common;
+using Cysharp.Threading.Tasks;
 using EFT;
 using JetBrains.Annotations;
-using System.Collections;
+using SamSWAT.FireSupport.ArysReloaded.Utils;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class UH60Behaviour : ComponentBase, IFireSupportOption
+public sealed class UH60Behaviour : FireSupportBehaviour
 {
 	private static readonly int s_flySpeedMultiplier = Animator.StringToHash("FlySpeedMultiplier");
 	private static readonly int s_flyAway = Animator.StringToHash("FlyAway");
@@ -18,8 +21,15 @@ public class UH60Behaviour : ComponentBase, IFireSupportOption
 	public AudioSource rotorsCloseSource;
 	public AudioSource rotorsDistantSource;
 	
-	public void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation)
+	private CancellationToken? _cancellationToken;
+	
+	public override ESupportType SupportType => ESupportType.Extract;
+	
+	public override void ProcessRequest(Vector3 position, Vector3 direction, Vector3 rotation,
+		CancellationToken cancellationToken)
 	{
+		_cancellationToken = cancellationToken;
+		
 		Transform heliTransform = transform;
 		heliTransform.position = position;
 		heliTransform.eulerAngles = rotation;
@@ -31,60 +41,63 @@ public class UH60Behaviour : ComponentBase, IFireSupportOption
 		CrossFadeAudio();
 	}
 	
-	public void ReturnToPool()
+	protected override void OnAwake()
 	{
-		gameObject.SetActive(false);
-	}
-	
-	private void OnEnable()
-	{
-		FireSupportPlugin.RegisterComponent(this);
-	}
-	
-	private void OnDisable()
-	{
-		FireSupportPlugin.DeregisterComponent(this);
+		AudioMixerGroup outputAudioMixerGroup = Singleton<BetterAudio>.Instance.OutEnvironment;
+		engineCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		engineDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		rotorsCloseSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		rotorsDistantSource.outputAudioMixerGroup = outputAudioMixerGroup;
+		
+		HasFinishedInitialization = true;
 	}
 	
 	private void CrossFadeAudio()
 	{
 		GameWorld gameWorld = Singleton<GameWorld>.Instance;
-		if (gameWorld == null || gameWorld.MainPlayer == null)
+		if (!PlayerHelper.IsMainPlayerAlive())
 		{
-			FireSupportPlugin.DeregisterComponent(this);
 			return;
 		}
 		
 		float distance = Vector3.Distance(gameWorld.MainPlayer.CameraPosition.position, rotorsCloseSource.transform.position);
 		float volume = volumeCurve.Evaluate(distance);
 		
-		rotorsCloseSource.volume = volume;
-		engineCloseSource.volume = volume - 0.2f;
-		rotorsDistantSource.volume = 1 - volume;
-		engineDistantSource.volume = 1 - volume;
+		rotorsCloseSource.volume = Mathf.Clamp01(volume);
+		engineCloseSource.volume = Mathf.Clamp01(volume - 0.2f);
+		rotorsDistantSource.volume = Mathf.Clamp01(1 - volume);
+		engineDistantSource.volume = Mathf.Clamp01(1 - volume);
 	}
 	
 	[UsedImplicitly]
-	private IEnumerator OnHelicopterArrive()
+	private async UniTaskVoid OnHelicopterArrive()
 	{
 		FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliPickingUp);
 		GameObject extractionPoint = CreateExfilPoint();
 		float waitTime = FireSupportPlugin.HelicopterWaitTime.Value * 0.75f;
 		
-		yield return new WaitForSeconds(waitTime);
+		await UniTask.WaitForSeconds(waitTime, cancellationToken: _cancellationToken!.Value);
 		
 		FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliHurry);
 		
-		yield return new WaitForSeconds(FireSupportPlugin.HelicopterWaitTime.Value - waitTime);
+		await UniTask.WaitForSeconds(
+			duration: FireSupportPlugin.HelicopterWaitTime.Value - waitTime,
+			cancellationToken: _cancellationToken!.Value);
 		
 		helicopterAnimator.SetTrigger(s_flyAway);
 		Destroy(extractionPoint);
 		FireSupportAudio.Instance.PlayVoiceover(EVoiceoverType.SupportHeliLeavingNoPickup);
 	}
 	
+	private async UniTask WaitForHelicopterLanding(CancellationToken cancellationToken)
+	{
+		
+	}
+	
 	[UsedImplicitly]
 	private void OnHelicopterLeft()
 	{
+		_cancellationToken = null;
 		ReturnToPool();
 	}
 	
@@ -97,7 +110,7 @@ public class UH60Behaviour : ComponentBase, IFireSupportOption
 			transform =
 			{
 				position = transform.position,
-				eulerAngles = new Vector3(-90,0,0),
+				eulerAngles = new Vector3(-90, 0, 0),
 			}
 		};
 		var extractionCollider = extractionPoint.AddComponent<BoxCollider>();

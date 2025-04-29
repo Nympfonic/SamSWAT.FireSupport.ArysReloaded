@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class FireSupportUIElement : MonoBehaviour
+public class FireSupportUIElement : ComponentBase
 {
 	public Image Icon;
 	public Image BackgroundImage;

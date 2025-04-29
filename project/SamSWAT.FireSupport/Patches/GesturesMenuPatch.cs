@@ -7,6 +7,7 @@ using EFT.UI.Gestures;
 using HarmonyLib;
 using SamSWAT.FireSupport.ArysReloaded.Unity;
 using SPT.Reflection.Patching;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,12 +30,22 @@ public class GesturesMenuPatch : ModulePatch
 			return;
 		}
 		
-		var owner = Singleton<GameWorld>.Instance.MainPlayer.GetComponent<GamePlayerOwner>();
-		FireSupportController fireSupportController = await FireSupportController.Init(__instance);
-		Traverse.Create(owner).Field<List<InputNode>>("_children").Value.Add(fireSupportController);
-		
-		var gesturesBindPanel = __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(includeInactive: true);
-		gesturesBindPanel.transform.localPosition = new Vector3(0, -530, 0);
+		try
+		{
+			var owner = Singleton<GameWorld>.Instance.MainPlayer.GetComponent<GamePlayerOwner>();
+			var fireSupportController = await FireSupportController.Create(__instance);
+			Traverse.Create(owner)
+				.Field<List<InputNode>>("_children")
+				.Value
+				.Add(fireSupportController);
+			
+			var gesturesBindPanel = __instance.gameObject.GetComponentInChildren<GesturesBindPanel>(includeInactive: true);
+			gesturesBindPanel.transform.localPosition = new Vector3(0, -530, 0);
+		}
+		catch (Exception ex)
+		{
+			FireSupportPlugin.LogSource.LogError(ex);
+		}
 	}
 	
 	private static bool IsFireSupportAvailable()

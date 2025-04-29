@@ -4,17 +4,24 @@ namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
 public abstract class ComponentBase : MonoBehaviour
 {
-	private bool _markedForRemoval;
-	
-	public abstract void ManualUpdate();
-	
-	public bool IsMarkedForRemoval()
+	protected virtual void Awake()
 	{
-		return _markedForRemoval;
+		useGUILayout = false;
+		OnAwake();
 	}
 	
-	public void MarkForRemoval()
+	protected virtual void Start()
 	{
-		_markedForRemoval = true;
+		OnStart();
 	}
+	
+	/// <summary>
+	/// Use this method to initialize data within the Unity Awake event function.
+	/// </summary>
+	protected virtual void OnAwake() {}
+	
+	/// <summary>
+	/// Use this method to initialize data within the Unity Start event function.
+	/// </summary>
+	protected virtual void OnStart() {}
 }

@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -20,7 +21,9 @@ internal static class AssetLoader
 			return bundle;
 		}
 		
-		AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(FireSupportPlugin.Directory + bundlePath);
+		
+		AssetBundleCreateRequest bundleRequest = AssetBundle.LoadFromFileAsync(
+			Path.Combine(FireSupportPlugin.Directory, bundlePath));
 		
 		while (!bundleRequest.isDone)
 		{

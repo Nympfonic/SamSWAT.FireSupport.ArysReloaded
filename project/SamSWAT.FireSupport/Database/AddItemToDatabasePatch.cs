@@ -1,7 +1,7 @@
-﻿using EFT.InventoryLogic;
+﻿using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using Newtonsoft.Json;
-using SamSWAT.FireSupport.ArysReloaded.Unity;
 using SPT.Reflection.Patching;
 using SPT.Reflection.Utils;
 using System;
@@ -21,7 +21,7 @@ public class AddItemToDatabasePatch : ModulePatch
 	}
 	
 	[PatchPostfix]
-	public static void PatchPostfix(Dictionary<string, ItemTemplate> __instance)
+	public static void PatchPostfix(Dictionary<MongoID, ItemTemplate> __instance)
 	{
 		Type t = PatchConstants.EftTypes.Single(x => x.GetField("SerializerSettings") != null);
 		var converters = (JsonConverter[])t.GetField("Converters").GetValue(null);
@@ -29,16 +29,27 @@ public class AddItemToDatabasePatch : ModulePatch
 		
 		string jsonPath = Path.Combine(databasePath, "ammo_30x173_gau8_avenger.json");
 		var gau8Ammo = LoadJson<AmmoTemplate>(jsonPath, converters);
-		__instance.Add(ItemConstants.GAU8_AMMO_TPL, gau8Ammo);
+		AddItemTo(gau8Ammo, __instance);
 		
 		jsonPath = Path.Combine(databasePath, "weapon_ge_gau8_avenger_30x173.json");
 		var gau8Weapon = LoadJson<WeaponTemplate>(jsonPath, converters);
-		__instance.Add(ItemConstants.GAU8_WEAPON_TPL, gau8Weapon);
+		AddItemTo(gau8Weapon, __instance);
 	}
 	
 	private static T LoadJson<T>(string jsonPath, JsonConverter[] converters)
 	{
 		string json = File.ReadAllText(jsonPath);
 		return JsonConvert.DeserializeObject<T>(json, converters);
+	}
+	
+	private static void AddItemTo(ItemTemplate itemTemplate, Dictionary<MongoID, ItemTemplate> dictionary)
+	{
+		dictionary.Add(itemTemplate._id, itemTemplate);
+		
+		MongoID? parentId = itemTemplate.ParentId;
+		if (parentId.HasValue)
+		{
+			dictionary[parentId.Value].AddChild(itemTemplate);
+		}
 	}
 }

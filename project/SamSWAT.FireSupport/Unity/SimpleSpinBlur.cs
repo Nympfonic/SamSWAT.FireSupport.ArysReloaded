@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SamSWAT.FireSupport.ArysReloaded.Unity;
 
-public class SimpleSpinBlur : ComponentBase
+public class SimpleSpinBlur : UpdatableComponentBase
 {
 	private Mesh _ssbMesh;
 	private Material _ssbMaterial;
@@ -74,16 +74,12 @@ public class SimpleSpinBlur : ComponentBase
 		}
 	}
 	
-	private void Start()
+	protected override void OnStart()
 	{
-		FireSupportPlugin.RegisterComponent(this);
 		_ssbMesh = GetComponent<MeshFilter>().mesh;
 		_ssbMaterial = GetComponent<MeshRenderer>().sharedMaterial;
 		_ssbMaterial.enableInstancing = enableGPUInstancing;
-	}
-	
-	private void OnDestroy()
-	{
-		FireSupportPlugin.DeregisterComponent(this);
+		
+		HasFinishedInitialization = true;
 	}
 }
