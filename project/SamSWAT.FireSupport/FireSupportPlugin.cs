@@ -12,6 +12,7 @@ using System.Reflection;
 namespace SamSWAT.FireSupport.ArysReloaded;
 
 [BepInPlugin("com.SamSWAT.FireSupport.ArysReloaded", "SamSWAT's FireSupport: Arys Reloaded", "2.3.0")]
+[BepInDependency("com.Arys.UnityToolkit", "1.3.0")]
 public class FireSupportPlugin : BaseUnityPlugin
 {
 	private readonly List<UpdatableComponentBase> _componentsToUpdate = [];
