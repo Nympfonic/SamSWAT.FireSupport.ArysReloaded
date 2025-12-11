@@ -7,9 +7,14 @@
   },
   "locales": {
     "en": {
-      "name": "PGU-13/B HEI High Explosive Incendiary",
-      "shortName": "PGU-13/B HEI",
+      "name": "PGU-13/B HEI High Explosive Incendiary", 
+      "shortName": "PGU-13/B HEI", 
       "description": "The PGU-13/B HEI High Explosive Incendiary round employs a standard M505 fuze and explosive mixture with a body of naturally fragmenting material that is effective against lighter vehicle and material targets."
+    },
+    "ch": {
+      "name": "PGU-13/B HEI 高爆燃烧弹",
+      "shortName": "PGU-13/B HEI",
+      "description": "PGU-13/B HEI 高爆燃烧弹采用标准 M505 引信和爆炸物混合物，弹体由自然碎裂材料构成，对轻型车辆和装甲目标具有良好的打击效果。"
     }
   },
   "newItem": {
