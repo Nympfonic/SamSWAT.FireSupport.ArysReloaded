@@ -7,9 +7,14 @@
   },
   "locales": {
     "en": {
-      "name": "Fairchild Republic A-10 Thunderbolt II",
-      "shortName": "A-10 Thunderbolt II",
+      "name": "Fairchild Republic A-10 Thunderbolt II", 
+      "shortName": "A-10 Thunderbolt II", 
       "description": "Close air support attack aircraft developed by Fairchild Republic for the USAF with a mounted GAU-8/A Avenger 30mm autocannon."
+    },
+    "ch": {
+      "name": "F.R. A-10 雷霆 II \"疣猪\" 对地攻击机",
+      "shortName": "A-10 30毫米对地航炮",
+      "description": "由Fairchild Republic为美国空军开发的对地支援攻击机，配备 GAU-8/A 复仇者 30毫米航炮。"
     }
   },
   "newItem": {
